@@ -11,4 +11,8 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Windows\" />
+  </ItemGroup>
+
 </Project>

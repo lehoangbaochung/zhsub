@@ -3,12 +3,201 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:zhsub"
+        xmlns:local="clr-namespace:zhsub.Commands"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <StackPanel>
-        <Menu Height="20"></Menu>
-        <ToolBar Height="20"></ToolBar>
-        <Button Click="Button_Click">Search</Button>
-    </StackPanel>
+        Title="Search" Height="1000" Width="1000" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Command="New" />
+                <MenuItem Command="local:Open.File" />
+                <Separator />
+                <MenuItem Header="_Exit" />
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Command="Cut" />
+                <MenuItem Command="Copy" />
+                <MenuItem Command="Paste" />
+            </MenuItem>
+        </Menu>
+            
+        <ToolBarTray DockPanel.Dock="Top" IsLocked="True">
+            <ToolBar>
+                <Button Command="New" ToolTip="New subtiltes (Ctrl+N)">New</Button>
+                <Button Command="Open" ToolTip="Open a subtitles file (Ctrl+O)">Open</Button>
+                <Button Command="Save" ToolTip="Save current subtitles (Ctrl+S)">Save</Button>
+                <Separator />
+                <Button Command="Cut" ToolTip="Cut selection to Windows Clipboard">Cut</Button>
+                <Button Command="Copy" ToolTip="Copy selection to Windows Clipboard">Copy</Button>
+                <Button Command="Paste" ToolTip="Paste from Windows Clipboard">Paste</Button>
+                <Separator />
+                <Label>Font size:</Label>
+                <ComboBox>
+                    <ComboBoxItem>10</ComboBoxItem>
+                    <ComboBoxItem IsSelected="True">12</ComboBoxItem>
+                    <ComboBoxItem>14</ComboBoxItem>
+                    <ComboBoxItem>16</ComboBoxItem>
+                </ComboBox>
+            </ToolBar>
+        </ToolBarTray>
+
+        <DockPanel DockPanel.Dock="Top">
+            <Label>Keyword:</Label>
+            <TextBox x:Name="tbxSearch" Width="500"></TextBox>
+            <Button x:Name="btnSearch" Click="btnSearch_Click">Search</Button>
+        </DockPanel>
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>Line 234, Column 12</StatusBarItem>
+            <StatusBarItem>
+                <ProgressBar Value="100" Width="200" Height="10"></ProgressBar>
+            </StatusBarItem>
+            <StatusBar.Background>
+                <SolidColorBrush Color="Red"></SolidColorBrush>
+            </StatusBar.Background>
+        </StatusBar>
+
+        <TabControl x:Name="tcMain" TabStripPlacement="Left">
+            <TabItem x:Name="tiEditor" Header="Editor" Width="100" Height="50">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="rowEditor" Width="0.5*"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <DockPanel DockPanel.Dock="Left">
+                        <DockPanel DockPanel.Dock="Top">
+                            <MediaElement x:Name="mdeVideo" Height="0"></MediaElement>
+                            <ToolBarTray IsLocked="True">
+                                <ToolBar DockPanel.Dock="Bottom">
+                                    <Button Command="Cut" ToolTip="Play video starting on this position">Play</Button>
+                                    <Button Command="Copy" ToolTip="Play current line">Play</Button>
+                                    <Button Command="Copy" ToolTip="Pause video playback">Pause</Button>
+                                    <Separator />
+                                    <TextBox x:Name="tbxStartTime" ToolTip="Start time" Text="{Binding SelectedValue.Text, ElementName=lvEditor}"></TextBox>
+                                    <TextBox x:Name="tbxEndTime" ToolTip="End time" Text="{Binding SelectedValue.Index, ElementName=lvEditor}"></TextBox>
+                                    <TextBox x:Name="tbxDuration" ToolTip="Line duration" Margin="5 0 5 0">0:00:00.00</TextBox>
+                                    <Separator />
+                                    <Label>Font size:</Label>
+                                    <ComboBox>
+                                        <ComboBoxItem>10</ComboBoxItem>
+                                        <ComboBoxItem IsSelected="True">12</ComboBoxItem>
+                                        <ComboBoxItem>14</ComboBoxItem>
+                                        <ComboBoxItem>16</ComboBoxItem>
+                                    </ComboBox>
+                                </ToolBar>
+                            </ToolBarTray>
+                        </DockPanel>
+                        <TextBox x:Name="tbxInput" Text="{Binding SelectedValue.Text, ElementName=lvEditor}"></TextBox>
+                    </DockPanel>
+
+                    <ListView Grid.Column="1" x:Name="lvEditor" SelectionMode="Extended">
+                        <!--<ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"></TextBlock>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>-->
+                        
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="#" Width="50" DisplayMemberBinding="{Binding Index}" />
+                                <GridViewColumn Header="Start" Width="100" DisplayMemberBinding="{Binding StartTime}" />
+                                <GridViewColumn Header="End" Width="100" DisplayMemberBinding="{Binding EndTime}" />
+                                <GridViewColumn Header="CPS" Width="50" />
+                                <GridViewColumn Header="Text" Width="510" DisplayMemberBinding="{Binding Text}"/>
+                                <GridView.ColumnHeaderContainerStyle>
+                                    <Style BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
+                                        <Setter Property="IsHitTestVisible" Value="False"/>
+                                    </Style>
+                                </GridView.ColumnHeaderContainerStyle>
+                            </GridView>
+                        </ListView.View>
+
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <EventSetter Event="MouseUp" Handler="ListViewItem_MouseUp" />
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                    <!--<DataGrid 
+                        Grid.Row="1" x:Name="dgEditor" IsReadOnly="true" 
+                        ItemsSource="{Binding Items}" 
+                        SelectedItem="{Binding Path=SelectedText, ElementName=tbxInput, Mode=OneWayToSource}" 
+                        MouseEnter="dgEditor_MouseEnter">
+                        <GridView>
+                            <GridViewColumn Header="ID" Width="0" DisplayMemberBinding="{Binding ID}" />
+                            <GridViewColumn Header="Time" Width="150" DisplayMemberBinding="{Binding Time}" />
+                        </GridView>
+                    </DataGrid>-->
+                </Grid>
+            </TabItem>
+
+            <TabItem x:Name="tiSearch" Header="Search" Visibility="Collapsed">
+                <Grid>
+                    <DockPanel DockPanel.Dock="Right">
+                        <TextBlock DockPanel.Dock="Top" x:Name="txbResultCount" FontSize="30" Margin="10"></TextBlock>
+                        <ListView x:Name="lvSearch">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="ID" Width="0" DisplayMemberBinding="{Binding ID}" />
+                                    <GridViewColumn Header="Time" Width="150" DisplayMemberBinding="{Binding Time}" />
+                                    <GridViewColumn Header="Song" Width="535" DisplayMemberBinding="{Binding Song}" />
+                                    <GridViewColumn Header="Artist" Width="350" DisplayMemberBinding="{Binding Artist}" />
+                                    <GridViewColumn Header="View" Width="150" DisplayMemberBinding="{Binding View}" />
+                                    <GridViewColumn>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate DataType="Button">
+                                                <Button Content="❤" Click="btnBookmark_Click" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="✅" Click="btnDownload_Click" />
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+
+                                    <GridView.ColumnHeaderContainerStyle>
+                                        <Style BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                        </Style>
+                                    </GridView.ColumnHeaderContainerStyle>
+                                </GridView>
+                            </ListView.View>
+
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_PreviewMouseLeftButtonDown" />
+                                    <Setter Property="ToolTip">
+                                        <Setter.Value>
+                                            <UniformGrid Columns="1">
+                                                <TextBlock Text="{Binding Lyric}"/>
+                                            </UniformGrid>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                        </ListView>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+
+        <!--<DataGrid Name="dgResult" AutoGenerateColumns="False" Focusable="False" IsReadOnly="True" VerticalContentAlignment="Center" VerticalAlignment="Center">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Time" Width="1*" Binding="{Binding Time}" />
+                    <DataGridTextColumn Header="Song" Width="5*" Binding="{Binding Song}" />
+                    <DataGridTextColumn Header="Artist" Width="5*" Binding="{Binding Artist}" />
+                    <DataGridTextColumn Header="View" Width="1*" Binding="{Binding View}" />
+                </DataGrid.Columns>
+                <DataGrid.RowDetailsTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Detail}" Margin="5" />
+                    </DataTemplate>
+                </DataGrid.RowDetailsTemplate>
+            </DataGrid>-->
+    </DockPanel>
 </Window>
