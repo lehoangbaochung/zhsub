@@ -54,18 +54,18 @@ namespace zhsub.Models.Files
 
             private set 
             {
-                var duration = DateTime.Parse(EndTime.ToString()).Subtract(DateTime.Parse(StartTime.ToString())).TotalSeconds;
+                value = DateTime.Parse(EndTime.ToString()).Subtract(DateTime.Parse(StartTime.ToString())).TotalSeconds;
 
-                if (duration > 0)
-                    cps = Text.ToString().Length / duration;
+                if ((int)value > 0)
+                    cps = Text.ToString().Length / (int)value;
                 else
-                    cps = 2;
+                    cps = 0;
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public void NotifyPropertyChanged(string propName)
+        private void NotifyPropertyChanged(string propName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }

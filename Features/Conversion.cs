@@ -76,79 +76,62 @@ namespace zhsub.Features
                 return $"{hour}:{min}:{sec},{tick}";
         }
 
-        public static object LrcToSrt(List<Lrc> lrcList)
+        public static void LrcToSrt(string text)
         {
-            for (int i = 0; i < lrcList.Count; i++)
+            var sr = new StringReader(text);
+            
+            string line;
+
+            var list = new List<string>();
+
+            while ((line = sr.ReadLine()) != null)
+            {
+                list.Add(line);
+            }
+
+            for (int i = 0; i < list.Count - 1; i++)
             {
                 var srt = new Srt()
                 {
                     Index = i + 1,
-                    StartTime = TimeLrcToSrt(lrcList[i].Time),
-                    Text = lrcList[i].Text
+                    StartTime = list[i].Substring(list[i].IndexOf('[') + 1, list[i].IndexOf(']') - 1),
+                    EndTime = list[i + 1].Substring(list[i + 1].IndexOf('[') + 1, list[i + 1].IndexOf(']') - 1),
+                    Text = list[i].Substring(list[i].IndexOf(']') + 1)
                 };
 
-                if ((i + 1) < lrcList.Count)
-                    srt.EndTime = TimeLrcToSrt(lrcList[i + 1].Time);
-                else
-                    srt.EndTime = srt.StartTime; // plus 3 secs
-
-                ViewModel.SrtList.Add(srt);
+                ListModel.SrtList.Add(srt);
             }
-
-            return ViewModel.SrtList;
         }
 
-        public static List<Lrc> SrtToLrc(List<Srt> srtList)
-        {
-            var lrcList = new List<Lrc>();
+        //public static void Lrc(string text)
+        //{
+        //    var sr = new StringReader(text);
 
-            foreach (var item in srtList)
-            {
-                //var time = item.StartTime.ToString().Split(':');
+        //    string line;
 
-                var startTime = item.StartTime.ToString();
+        //    List<string> lineList = new List<string>();
 
-                var lrc = new Lrc()
-                {
-                    Time = startTime.Substring(startTime.IndexOf(':') + 1, startTime.IndexOf(',') + 2).Replace(',', '.'),
-                    Text = item.Text
-                };
+        //    while ((line = sr.ReadLine()) != null)
+        //    {
+        //        lineList.Add(line);
+        //    }
 
-                lrcList.Add(lrc);
-            }
+        //    for (int i = 0; i < lineList.Count; i++)
+        //    {
+        //        var srt = new Srt()
+        //        {
+        //            Index = 1,
+        //            StartTime = lineList[i].Substring(lineList[i].IndexOf('[') + 1, lineList[i].IndexOf(']') - 1),
+        //            Text = lineList[i].Substring(lineList[i].IndexOf(']') + 1)
+        //        };
 
-            return lrcList;
-        }
+        //        if (i + 1 < lineList.Count)
+        //            srt.EndTime = lineList[i + 1].Substring(lineList[i + 1].IndexOf('[') + 1, lineList[i + 1].IndexOf(']') - 1);
+        //        else
+        //            srt.EndTime = srt.StartTime;
 
-        public static void Lrc(string text)
-        {
-            var sr = new StringReader(text);
-
-            string line;
-
-            List<string> lineList = new List<string>();
-
-            while ((line = sr.ReadLine()) != null)
-            {
-                lineList.Add(line);
-            }
-
-            for (int i = 0; i < lineList.Count; i++)
-            {
-                var srt = new Srt()
-                {
-                    Index = 1,
-                    StartTime = lineList[i].Substring(lineList[i].IndexOf('[') + 1, lineList[i].IndexOf(']') - 1),
-                    Text = lineList[i].Substring(lineList[i].IndexOf(']') + 1)
-                };
-
-                if (i + 1 < lineList.Count)
-                    srt.EndTime = lineList[i + 1].Substring(lineList[i + 1].IndexOf('[') + 1, lineList[i + 1].IndexOf(']') - 1);
-                else
-                    srt.EndTime = srt.StartTime;
-
-                ViewModel.SrtList.Add(srt);
-            }    
-        }
+        //        ViewModel.SrtList.Add(srt);
+        //    }    
+        //}
     }
 }

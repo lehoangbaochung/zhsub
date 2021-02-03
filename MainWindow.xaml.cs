@@ -13,6 +13,8 @@ using zhsub.Models.Files;
 using zhsub.Models.Lists;
 using zhsub.Boundaries;
 using System.Collections.ObjectModel;
+using zhsub.Commands;
+using zhsub.Features;
 
 namespace zhsub
 {
@@ -33,9 +35,17 @@ namespace zhsub
             };
 
             searchResults = new List<SearchResult>();
-            ViewModel.SrtList = new ObservableCollection<Srt>();
-            lvEditor.ItemsSource = ViewModel.SrtList;
-            DataContext = this;
+
+            ListModel.SrtList.Add(new Srt()
+            {
+                Index = 1,
+                StartTime = new TimeSpan(0, 0, 0, 0, 0),
+                EndTime = new TimeSpan(0, 0, 0, 5, 0),
+                Text = null
+            });
+
+            lvEditor.ItemsSource = ListModel.SrtList;
+            lvEditor.SelectedIndex = 0;
         }
 
         void Crawl(string keyword)
@@ -115,33 +125,11 @@ namespace zhsub
 
                 tiEditor.IsSelected = true;
                 tbxInput.Text = null;
-                ViewModel.SrtList.Clear();
+                ListModel.SrtList.Clear();
+                Conversion.LrcToSrt(new WebClient().DownloadString("https://www.kugeci.com/download/lrc/" + selectedResult.ID));
 
-                Display.SrtFile(new WebClient().DownloadString("https://www.kugeci.com/download/lrc/" + selectedResult.ID));
-            }
-        }
-
-        private void ListViewItem_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            //if (lvEditor.SelectedItem != null)
-            //{
-            //    tbxInput.Text = (lvEditor.SelectedItem as Srt).Text.ToString();
-            //    tbxStartTime.Text = (lvEditor.SelectedItem as Srt).StartTime.ToString();
-            //    tbxEndTime.Text = (lvEditor.SelectedItem as Srt).EndTime.ToString();
-            //}
-        }
-
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var textBox = sender as TextBox;
-
-            if (lvEditor != null && lvEditor.SelectedItem != null)
-            { 
-                if (textBox == tbxInput) (lvEditor.SelectedItem as Srt).Text = tbxInput.Text;
-
-                if (textBox == tbxStartTime) (lvEditor.SelectedItem as Srt).StartTime = tbxStartTime.Text;
-
-                if (textBox == tbxEndTime) (lvEditor.SelectedItem as Srt).EndTime = tbxEndTime.Text;
+                lvEditor.ItemsSource = null;
+                lvEditor.ItemsSource = ListModel.SrtList;
             }
         }
 
@@ -151,6 +139,86 @@ namespace zhsub
             {
 
             }
+        }
+
+        private void MenuItem_File_Click(object sender, RoutedEventArgs e)
+        {
+            var menuItem = sender as MenuItem;
+
+            switch (menuItem.Name)
+            {
+                case "New":
+                    lvEditor.ItemsSource = null;
+                    ListModel.SrtList.Clear();
+                    break;
+                case "Open":
+                    Display.SubtitleFile(Open.Subtitle(), lvEditor);
+                    break;
+                case "Save":
+                    Save.Subtitle(lvEditor);
+                    break;
+                case "Save As":
+                    Save.Subtitle(lvEditor);
+                    break;
+            }
+        }
+
+        private void MenuItem_Video_Click(object sender, RoutedEventArgs e)
+        {
+            var menuItem = sender as MenuItem;
+
+            switch (menuItem.Name)
+            {
+                case "Open":
+                    Open.Video(mdeVideo);
+                    mdeVideo.Visibility = Visibility.Visible;
+                    tbaVideo.Visibility = Visibility.Visible;
+                    break;
+                case "Close":
+                    mdeVideo.Source = null;
+                    mdeVideo.Visibility = Visibility.Collapsed;
+                    tbaVideo.Visibility = Visibility.Collapsed;
+                    break;
+            }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            
+            switch(button.Name)
+            {
+                case "btnInsertBefore":
+                    Insert.BeforeLine(lvEditor);
+                    break;
+                case "btnInsertAfter":
+                    Insert.AfterLine(lvEditor);
+                    break;
+                case "btnTrim":
+                    break;
+            }
+        }
+
+        private void ButtonControl_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+
+            if (button == btnPlay)
+            {
+                mdeVideo.Play();
+            }
+            
+            if (button == btnPause)
+            {
+                mdeVideo.Pause();
+            } 
+            
+            if (button == btnPlayLine)
+            {
+                mdeVideo.Position = TimeSpan.Parse(tbxStartTime.Text);
+                
+                
+            }    
         }
     }
 }
