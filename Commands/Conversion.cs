@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using zhsub.Models;
 using zhsub.Models.Files;
-using zhsub.Models.Lists;
 
 namespace zhsub.Features
 {
@@ -99,7 +99,7 @@ namespace zhsub.Features
                     Text = list[i].Substring(list[i].IndexOf(']') + 1)
                 };
 
-                ListModel.SrtList.Add(srt);
+                List.Srt.Add(srt);
             }
         }
 

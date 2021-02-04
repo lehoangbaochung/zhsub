@@ -1,42 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using zhsub.Models;
 using zhsub.Models.Files;
-using zhsub.Models.Lists;
 using zhsub.Boundaries;
-using System.Collections.ObjectModel;
 using zhsub.Commands;
+using System.Linq;
 using zhsub.Features;
+using System.Net;
 
 namespace zhsub
 {
     public partial class MainWindow : Window
     {
-        #region properties
-        readonly List<SearchResult> searchResults;
-        readonly HttpClient httpClient;
-        #endregion
-
         public MainWindow()
         {
             InitializeComponent();
 
-            httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("https://www.kugeci.com/")
-            };
-
-            searchResults = new List<SearchResult>();
-
-            ListModel.SrtList.Add(new Srt()
+            List.Srt.Add(new Srt()
             {
                 Index = 1,
                 StartTime = new TimeSpan(0, 0, 0, 0, 0),
@@ -44,50 +28,8 @@ namespace zhsub
                 Text = null
             });
 
-            lvEditor.ItemsSource = ListModel.SrtList;
-            lvEditor.SelectedIndex = 0;
-        }
-
-        void Crawl(string keyword)
-        {
-            string innerHtml = httpClient.GetStringAsync("search?q=" + keyword).Result;
-
-            var regex = Regex.Match(innerHtml, @"<tbody>(.*?)</tbody>", RegexOptions.Singleline).Value;
-
-            var results = Regex.Matches(regex.ToString(), @"(?=<tr>).*?(?=</tr>)", RegexOptions.Singleline);
-
-            txbResultCount.Text = "Found " + results.Count + " result(s)";
-
-            if (results == null) return; // ko tìm thấy kết quả phù hợp
-
-            foreach (var result in results)
-            {
-                var items = Regex.Matches(result.ToString(), @"(?=<td.*?>).*?(?=</td>)", RegexOptions.Singleline);
-
-                var time = items[0].ToString().Substring(items[0].ToString().LastIndexOf('>') + 1);
-                var song = Regex.Match(items[1].ToString(), @"(?=<a.*?>).*?(?=</a>)", RegexOptions.Singleline).Value;
-                var artist = Regex.Match(items[2].ToString(), @"(?=<a.*?>).*?(?=</a>)", RegexOptions.Singleline).Value;
-                var view = items[3].ToString().Substring(items[3].ToString().LastIndexOf('>') + 1);
-                var link = Regex.Match(items[4].ToString(), @"(?=<a.*?).*?(?="">)", RegexOptions.Singleline).Value;
-
-                var val = new SearchResult()
-                {
-                    ID = link.Substring(link.LastIndexOf('/') + 1),
-                    Song = song.Substring(song.LastIndexOf('>') + 1),
-                    Artist = artist.Substring(artist.LastIndexOf('>') + 1),
-                    Time = time.Trim(),
-                    View = view
-                };
-
-                val.Lyric = new WebClient().DownloadString("https://www.kugeci.com/download/txt/" + val.ID).Trim();
-
-                if (val.Lyric.ToString().Length > 200)
-                    val.Lyric = val.Lyric.ToString().Substring(0, 200) + "...";
-
-                searchResults.Add(val);
-            }
-
-            lvSearch.ItemsSource = searchResults.OrderByDescending(s => s.Time).ToList();
+            lvSrtFile.ItemsSource = List.Srt;
+            lvSrtFile.SelectedIndex = 0;
         }
 
         private void btnDownload_Click(object sender, RoutedEventArgs e)
@@ -96,8 +38,8 @@ namespace zhsub
 
             if (item != null && item.IsSelected)
             {
-                var selectedResult = lvSearch.SelectedItems[0] as SearchResult;
-                MessageBox.Show("Download " + selectedResult.ID + " successfully!", "Download", MessageBoxButton.OK, MessageBoxImage.Information);
+                //var selectedResult = lvSearch.SelectedItems[0] as SearchResult;
+                //MessageBox.Show("Download " + selectedResult.ID + " successfully!", "Download", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -108,11 +50,10 @@ namespace zhsub
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
         {
-            tiSearch.IsSelected = true;
-            searchResults.Clear();
-            lvSearch.ItemsSource = null;
+            griEditor.Visibility = Visibility.Collapsed;
+            griSearch.Visibility = Visibility.Visible;
 
-            Crawl(tbxSearch.Text);
+            lvSearch.ItemsSource = Bind.Kugeci(Crawl.Kugeci(tbxSearch.Text));
         }
 
         private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -122,14 +63,15 @@ namespace zhsub
             if (item != null && item.IsSelected)
             {
                 var selectedResult = lvSearch.SelectedItems[0] as SearchResult;
-
-                tiEditor.IsSelected = true;
+                
+                griEditor.Visibility = Visibility.Visible;
+                griSearch.Visibility = Visibility.Collapsed;
                 tbxInput.Text = null;
-                ListModel.SrtList.Clear();
+                List.Srt.Clear();
                 Conversion.LrcToSrt(new WebClient().DownloadString("https://www.kugeci.com/download/lrc/" + selectedResult.ID));
 
-                lvEditor.ItemsSource = null;
-                lvEditor.ItemsSource = ListModel.SrtList;
+                lvSrtFile.ItemsSource = null;
+                lvSrtFile.ItemsSource = List.Srt;
             }
         }
 
@@ -145,20 +87,26 @@ namespace zhsub
         {
             var menuItem = sender as MenuItem;
 
-            switch (menuItem.Name)
+            switch (menuItem.Header)
             {
-                case "New":
-                    lvEditor.ItemsSource = null;
-                    ListModel.SrtList.Clear();
+                case "_New":
+                    lvSrtFile.ItemsSource = null;
+                    List.Srt.Clear();
                     break;
-                case "Open":
-                    Display.SubtitleFile(Open.Subtitle(), lvEditor);
+                case "_Open":
+                    Display.SubtitleFile(Open.Subtitle(), lvSrtFile);
                     break;
-                case "Save":
-                    Save.Subtitle(lvEditor);
+                case "_Save":
+                    Save.Subtitle(lvSrtFile);
                     break;
-                case "Save As":
-                    Save.Subtitle(lvEditor);
+                case "Save _As":
+                    Save.Subtitle(lvSrtFile);
+                    break;
+                case "New Window":
+                    Show();
+                    break;
+                case "Exit":
+                    Close();
                     break;
             }
         }
@@ -167,17 +115,19 @@ namespace zhsub
         {
             var menuItem = sender as MenuItem;
 
-            switch (menuItem.Name)
+            switch (menuItem.Header)
             {
                 case "Open":
                     Open.Video(mdeVideo);
                     mdeVideo.Visibility = Visibility.Visible;
-                    tbaVideo.Visibility = Visibility.Visible;
+                    tbtVideo.Visibility = Visibility.Visible;
+                    mdeVideo.Play();
+                    mdeVideo.Pause();
                     break;
                 case "Close":
                     mdeVideo.Source = null;
                     mdeVideo.Visibility = Visibility.Collapsed;
-                    tbaVideo.Visibility = Visibility.Collapsed;
+                    tbtVideo.Visibility = Visibility.Collapsed;
                     break;
             }
         }
@@ -189,10 +139,9 @@ namespace zhsub
             switch(button.Name)
             {
                 case "btnInsertBefore":
-                    Insert.BeforeLine(lvEditor);
+
                     break;
                 case "btnInsertAfter":
-                    Insert.AfterLine(lvEditor);
                     break;
                 case "btnTrim":
                     break;
@@ -215,7 +164,7 @@ namespace zhsub
             
             if (button == btnPlayLine)
             {
-                mdeVideo.Position = TimeSpan.Parse(tbxStartTime.Text);
+                //mdeVideo.Position = TimeSpan.Parse(tbxStartTime.Text);
                 
                 
             }    

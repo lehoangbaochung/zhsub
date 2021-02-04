@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Windows.Controls;
 using zhsub.Models.Files;
 
@@ -28,7 +26,7 @@ namespace zhsub.Commands
                 {
                     Index = list[i],
                     StartTime = list[i + 1].Substring(0, list[i + 1].IndexOf('-') - 1).Replace(',', '.'),
-                    EndTime = list[i + 1].Substring(list[i + 1].IndexOf('>') + 2).Replace(',', '.'),
+                    EndTime = list[i + 1][(list[i + 1].IndexOf('>') + 2)..].Replace(',', '.'),
                     Text = list[i + 2]
                 };
 

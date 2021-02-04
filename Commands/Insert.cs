@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using zhsub.Models.Files;
-using zhsub.Models.Lists;
+using zhsub.Models;
 
 namespace zhsub.Commands
 {
@@ -15,7 +15,7 @@ namespace zhsub.Commands
         {
             if (listView.SelectedItem == null) return;
 
-            ListModel.SrtList.Insert(listView.SelectedIndex, new Srt()
+            List.Srt.Insert(listView.SelectedIndex, new Srt()
             {
                 Index = listView.SelectedIndex + 1,
                 StartTime = (listView.Items[listView.SelectedIndex] as Srt).EndTime,
@@ -27,7 +27,7 @@ namespace zhsub.Commands
         {
             if (listView.SelectedItem == null) return;
 
-            ListModel.SrtList.Insert(listView.SelectedIndex + 1, new Srt()
+            List.Srt.Insert(listView.SelectedIndex + 1, new Srt()
             {
                 Index = listView.SelectedIndex + 2,
                 StartTime = (listView.SelectedItem as Srt).EndTime,
@@ -62,12 +62,6 @@ namespace zhsub.Commands
             var item = sender as ListView;
 
             if (item.SelectedItem == null) return;
-
-            ViewModel.SrtList.Insert(item.SelectedIndex, new Srt()
-            {
-                StartTime = (item.SelectedItem as Srt).EndTime,
-                EndTime = (item.SelectedItem as Srt).EndTime
-            });
         }
     }
 }
