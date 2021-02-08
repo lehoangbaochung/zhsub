@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Windows.Controls;
 using zhsub.Models;
 
 namespace zhsub.Commands

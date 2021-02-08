@@ -4,32 +4,87 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="Untitled - Zither Harp Subtitles 1.0.0" Height="1000" Width="1000" WindowState="Maximized">
+        Title="Zither Harp Subtitles 1.0.0" Height="1000" Width="1000" WindowState="Maximized">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New" Click="MenuItem_File_Click" />
-                <MenuItem Header="_Open" Click="MenuItem_File_Click" />
-                <MenuItem Header="_Save" Click="MenuItem_File_Click" />
-                <MenuItem Header="Save _As..." Click="MenuItem_File_Click" />
+                <MenuItem Header="_New" >
+                    <MenuItem Header="_SRT file" Name="newSrtFile" Click="MenuItem_File_Click" />
+                    <MenuItem Header="_LRC file" Name="newLrcFile" Click="MenuItem_File_Click" />
+                </MenuItem>
+                <MenuItem Header="_Open" InputGestureText="Ctrl+O" Name="openSubtitle" Click="MenuItem_File_Click" />
+                <MenuItem Header="_Save" InputGestureText="Ctrl+S" Name="saveSubtitle" Click="MenuItem_File_Click" />
+                <MenuItem Header="Save _as..." InputGestureText="Ctrl+Shift+S" Click="MenuItem_File_Click" />
                 <MenuItem Header="Recent" Click="MenuItem_File_Click" />
                 <Separator />
-                <MenuItem Header="New Window" Click="MenuItem_File_Click" />
-                <MenuItem Header="_Exit" Click="MenuItem_File_Click" />
+                <MenuItem Header="New _window" InputGestureText="Ctrl+Shift+N" Name="newWindow" Click="MenuItem_File_Click" />
+                <MenuItem Header="_Quit" InputGestureText="Ctrl+Q" Name="closeWindow" Click="MenuItem_File_Click" />
             </MenuItem>
             <MenuItem Header="_Edit">
-                <MenuItem Command="Cut" />
-                <MenuItem Command="Copy" />
-                <MenuItem Command="Paste" />
+                <MenuItem Command="Undo" Header="_Undo" InputGestureText="Ctrl+Z" />
+                <MenuItem Command="Redo" Header="_Redo" InputGestureText="Ctrl+Y" />
+                <Separator />
+                <MenuItem Command="Cut" Header="Cu_t" InputGestureText="Ctrl+X" />
+                <MenuItem Command="Copy" Header="_Copy" InputGestureText="Ctrl+C" />
+                <MenuItem Command="Paste" Header="_Paste" InputGestureText="Ctrl+V" />
+                <MenuItem Command="Paste" Header="Paste _over" InputGestureText="Ctrl+Shift+V" />
+                <Separator />
+                <MenuItem Command="Find" Header="_Find" InputGestureText="Ctrl+F" />
+                <MenuItem Header="Find _and Replace" InputGestureText="Ctrl+H" />
+            </MenuItem>
+            <MenuItem Header="_Line">
+                <MenuItem Header="_Insert" >
+                    <MenuItem Header="_Before current" Name="insertBeforeLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                    <MenuItem Header="_After current" Name="insertAfterLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="D_uplicate" Name="duplicateLines" Click="MenuItem_Subtitle_Click" />
+                <MenuItem Header="_Delete" Name="deleteLines" Click="MenuItem_Subtitle_Click" />
+                <MenuItem Header="_Sort" >
+                    <MenuItem Header="_Selected lines" Name="sortSelectedLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                    <MenuItem Header="_All lines" Name="sortAllLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="S_elect" >
+                    <MenuItem Header="_Match lines" Name="selectMatchLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                    <MenuItem Header="_All lines" Name="selectAllLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Timing">
+                <MenuItem Header="_Open"  Click="MenuItem_Video_Click" />
+                <MenuItem Header="_Close" Click="MenuItem_Video_Click" />
+                <MenuItem Header="_Recent" ItemsSource="{Binding Text}" />
             </MenuItem>
             <MenuItem Header="_Video">
-                <MenuItem Header="Open" Click="MenuItem_Video_Click" />
-                <MenuItem Header="Close" Click="MenuItem_Video_Click" />
+                <MenuItem Header="_Open" Name="openVideo" Click="MenuItem_Video_Click" />
+                <MenuItem Header="_Close" Name="closeVideo" Click="MenuItem_Video_Click" />
+                <MenuItem Header="_Recent" ItemsSource="{Binding Text}" />
+            </MenuItem>
+            <MenuItem Header="_Tools">
+                <MenuItem Header="_Beautify" >
+                    <MenuItem Header="Trim lines" Click="MenuItem_Video_Click" />
+                    <MenuItem Header="Time format" Click="MenuItem_Video_Click" />
+                </MenuItem>
+                <MenuItem Header="_Convert" >
+                    <MenuItem Header="SRT to LRC" Click="MenuItem_Video_Click" />
+                    <MenuItem Header="LRC to SRT" Click="MenuItem_Video_Click" />
+                </MenuItem>
                 <MenuItem Header="Recent" ItemsSource="{Binding Text}" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Language" Click="MenuItem_Video_Click" />
+                <MenuItem Header="_Option" Click="MenuItem_Video_Click" />
+                <Separator />
+                <MenuItem Header="_Toolbar" Name="viewToolbar" IsCheckable="True" />
+            </MenuItem>
+            <MenuItem Header="_Help">
+                <MenuItem Header="_Contents" Click="MenuItem_Video_Click" />
+                <Separator />
+                <MenuItem Header="_Website" Click="MenuItem_Video_Click" />
+                <Separator />
+                <MenuItem Header="_About" />
             </MenuItem>
         </Menu>
             
-        <ToolBarTray DockPanel.Dock="Top" IsLocked="True">
+        <ToolBarTray DockPanel.Dock="Top" IsLocked="True" >
             <ToolBar>
                 <Button Command="New" ToolTip="New subtiltes (Ctrl+N)">New</Button>
                 <Button x:Name="btnOpenFile" Command="Open" ToolTip="Open a subtitles file (Ctrl+O)">Open</Button>
@@ -38,14 +93,6 @@
                 <Button Command="Cut" ToolTip="Cut selection to Windows Clipboard">Cut</Button>
                 <Button Command="Copy" ToolTip="Copy selection to Windows Clipboard">Copy</Button>
                 <Button Command="Paste" ToolTip="Paste from Windows Clipboard">Paste</Button>
-                <Separator />
-                <Label>Font size:</Label>
-                <ComboBox>
-                    <ComboBoxItem>10</ComboBoxItem>
-                    <ComboBoxItem IsSelected="True">12</ComboBoxItem>
-                    <ComboBoxItem>14</ComboBoxItem>
-                    <ComboBoxItem>16</ComboBoxItem>
-                </ComboBox>
             </ToolBar>
         </ToolBarTray>
 
@@ -65,7 +112,7 @@
             </StatusBar.Background>
         </StatusBar>
 
-        <Grid x:Name="griEditor" Margin="5 0 0 0">
+        <Grid x:Name="griEditor" Margin="5 0 5 0">
             <DockPanel>
                 <ToolBarTray x:Name="tbtEditor" DockPanel.Dock="Top" IsLocked="True">
                     <ToolBar DockPanel.Dock="Bottom">
@@ -84,30 +131,30 @@
                 </ToolBarTray>
 
                 <DockPanel>
-                    <DockPanel DockPanel.Dock="Left">
+                    <DockPanel DockPanel.Dock="Left" Width="575">
                         <DockPanel x:Name="dpaVideo" DockPanel.Dock="Top" Visibility="Collapsed">
                             <Grid DockPanel.Dock="Top">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="1*"></RowDefinition>
-                                    <RowDefinition Height="1*"></RowDefinition>
-                                </Grid.RowDefinitions>
-
-                                <MediaElement x:Name="mdeVideo" Grid.Row="0" Height="325" Width="575" LoadedBehavior="Manual"></MediaElement>
-                                <TextBlock x:Name="txbSubtitle" Grid.Row="1" FontSize="20" Background="Black" Foreground="White" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center"></TextBlock>
+                                <MediaElement x:Name="mdeVideo" Height="325" Width="575" LoadedBehavior="Manual"></MediaElement>
+                                <TextBlock x:Name="txbSubtitle" FontSize="16" Margin="0 0 0 5" TextAlignment="Center"
+                                           Background="Black" Foreground="White" TextWrapping="WrapWithOverflow" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Bottom" 
+                                           Text="{Binding SelectedValue.Text, ElementName=lvEditor, UpdateSourceTrigger=PropertyChanged}">
+                                </TextBlock>
                             </Grid>
-                            
-                            <Slider DockPanel.Dock="Top" TickPlacement="TopLeft" TickFrequency="1" Foreground="Black" Maximum="{Binding Position.TotalSeconds, ElementName=mdeVideo}" IsSnapToTickEnabled="True" ToolTip="Seek video" />
-                            <ToolBarTray x:Name="tbtVideo" DockPanel.Dock="Top" IsLocked="True" Background="Yellow">
-                                <ToolBar >
+                            <Slider x:Name="sliDuration" DockPanel.Dock="Top" TickPlacement="TopLeft" Foreground="Black"
+                                    IsSnapToTickEnabled="True" ToolTip="Seek video" Value="0"
+                                    />
+                            <ToolBarTray DockPanel.Dock="Left" IsLocked="True" Background="Yellow" >
+                                <ToolBar HorizontalAlignment="Center" >
                                     <Button x:Name="btnPlay" Click="ButtonControl_Click" ToolTip="Play video starting on this position">▷</Button>
                                     <Button x:Name="btnPlayLine" Click="ButtonControl_Click" ToolTip="Play current line">⏯</Button>
                                     <Button x:Name="btnPause" Click="ButtonControl_Click" ToolTip="Pause video playback">⏸</Button>
-                                    <TextBox x:Name="txbCurrentTime" IsReadOnly="True" VerticalAlignment="Center">0:00:00.00</TextBox>
-                                    <TextBox x:Name="txbRelativeTime" IsReadOnly="True" VerticalAlignment="Center">+10677ms</TextBox>
+                                    <TextBox x:Name="txbCurrentTime" IsReadOnly="True" Text="{Binding Position.TotalSeconds, ElementName=mdeVideo, Mode=OneWay}"></TextBox>
+                                    <TextBox x:Name="txbRelativeTime" IsReadOnly="True" >+10677ms</TextBox>
                                     <Separator></Separator>
                                     <Label>Zoom:</Label>
                                     <ComboBox>
-                                        <ComboBoxItem>25%</ComboBoxItem>
+                                        <ComboBoxItem Tag="350">25%</ComboBoxItem>
                                         <ComboBoxItem IsSelected="True">50%</ComboBoxItem>
                                         <ComboBoxItem>75%</ComboBoxItem>
                                         <ComboBoxItem>100%</ComboBoxItem>
@@ -115,43 +162,49 @@
                                 </ToolBar>
                             </ToolBarTray>
                         </DockPanel>
-                        
-                        <TextBox x:Name="tbxInput" DockPanel.Dock="Bottom" Width="575" TextWrapping="Wrap" AcceptsReturn="True" SpellCheck.IsEnabled="True" Text="{Binding SelectedValue.Text, ElementName=lvEditor, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                        <TextBox x:Name="tbxInput" DockPanel.Dock="Bottom" Language="vi-VI"
+                                 SpellCheck.IsEnabled="True" TextWrapping="Wrap" AcceptsReturn="True"
+                                 IsEnabled="{Binding ElementName=lvEditor, Path=IsEnabled}"
+                                 Text="{Binding ElementName=lvEditor, Path=SelectedItem.Text}"
+                                 FontFamily="{Binding ElementName=cbxFontFamily, Path=SelectionBoxItem}"
+                                 FontSize="{Binding ElementName=cbxFontSize, Path=SelectionBoxItem}"
+                                 FontStyle="{Binding ElementName=cbxFontStyle, Path=SelectionBoxItem}"
+                                 FontStretch="{Binding ElementName=cbxFontStyle, Path=SelectionBoxItem}"
+                                 FontWeight="{Binding ElementName=cbxFontStyle, Path=SelectionBoxItem}">
+                        </TextBox>
                     </DockPanel>
 
-                    <ToolBarTray x:Name="tbtTime" DockPanel.Dock="Top" HorizontalAlignment="Center" IsLocked="True" Background="Red">
+                    <ToolBarTray x:Name="tbtTime" DockPanel.Dock="Top" HorizontalAlignment="Center" IsLocked="True">
                         <ToolBar>
-                            <TextBox x:Name="tbxStartTime" ToolTip="Start time" Text="{Binding SelectedValue.StartTime, ElementName=lvSrtFile, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                            <TextBox x:Name="tbxEndTime" ToolTip="End time" Text="{Binding SelectedValue.EndTime, ElementName=lvSrtFile, UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                            <TextBox x:Name="tbxDuration" ToolTip="Line duration" Margin="5 0 5 0">0:00:00.00</TextBox>
+                            <TextBox x:Name="tbxTotalLines" ToolTip="Total lines" Margin="5 0 5 0" IsReadOnly="True" Text="{Binding ElementName=lvEditor, Path=Items.Count, Mode=OneWay}"></TextBox>
+                            <TextBox x:Name="tbxStartTime" ToolTip="Start time (SRT file)" Text="{Binding SelectedValue.StartTime, ElementName=lvEditor}"></TextBox>
+                            <TextBox x:Name="tbxEndTime" ToolTip="End time (SRT file)" Text="{Binding SelectedValue.EndTime, ElementName=lvEditor}"></TextBox>
+                            <TextBox x:Name="tbxDuration" ToolTip="Line duration (SRT file)"></TextBox>
+                            <TextBox x:Name="tbxTime" ToolTip="Time (LRC file)" Margin="5 0 5 0" Text="{Binding SelectedValue.Time, ElementName=lvEditor}"></TextBox>
+                            <Label>Font:</Label>
+                            <ComboBox x:Name="cbxFontFamily" ToolTip="Font" ItemsSource="{x:Static Fonts.SystemFontFamilies}" Text="Segoe UI" />
+                            <Label>Size:</Label>
+                            <ComboBox x:Name="cbxFontSize" ToolTip="Font size" >
+                                <ComboBoxItem IsSelected="True">16</ComboBoxItem>
+                                <ComboBoxItem>20</ComboBoxItem>
+                                <ComboBoxItem>42</ComboBoxItem>
+                                <ComboBoxItem>60</ComboBoxItem>
+                            </ComboBox>
+                            <Label>Style:</Label>
+                            <ComboBox x:Name="cbxFontStyle" ToolTip="Font style">
+                                <ComboBoxItem IsSelected="True">Normal</ComboBoxItem>
+                                <ComboBoxItem>Bold</ComboBoxItem>
+                                <ComboBoxItem>Italic</ComboBoxItem>
+                            </ComboBox>
+                            <Label>Find:</Label>
+                            <TextBox x:Name="tbxFind" Foreground="Gray">Hello!</TextBox>
                         </ToolBar>
                     </ToolBarTray>
-                    
-                    <ListView x:Name="lvSrtFile" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListView.View>
-                            <GridView x:Name="gdvEditor">
-                                <GridViewColumn Header="#" Width="50" DisplayMemberBinding="{Binding Index}" />
-                                <GridViewColumn Header="Start" Width="100" DisplayMemberBinding="{Binding StartTime}" />
-                                <GridViewColumn Header="End" Width="100" DisplayMemberBinding="{Binding EndTime}" />
-                                <GridViewColumn Header="CPS" Width="50" DisplayMemberBinding="{Binding CPS}"/>
-                                <GridViewColumn Header="Text" Width="470" DisplayMemberBinding="{Binding Text}"/>
-                                <GridView.ColumnHeaderContainerStyle>
-                                    <Style BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
-                                        <Setter Property="IsHitTestVisible" Value="False"/>
-                                    </Style>
-                                </GridView.ColumnHeaderContainerStyle>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
 
-                    <ListView x:Name="lvLrcFile" Visibility="Collapsed" SelectionMode="Extended" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListView x:Name="lvEditor" Width="780" FontSize="14" SelectionMode="Extended" 
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="???" Width="50" DisplayMemberBinding="{Binding Index}" />
-                                <GridViewColumn Header="halo" Width="100" DisplayMemberBinding="{Binding StartTime}" />
-                                <GridViewColumn Header="End" Width="100" DisplayMemberBinding="{Binding EndTime}" />
-                                <GridViewColumn Header="CPS" Width="50" DisplayMemberBinding="{Binding CPS}"/>
-                                <GridViewColumn Header="Text" Width="470" DisplayMemberBinding="{Binding Text}"/>
+                            <GridView x:Name="gvEditor">
                                 <GridView.ColumnHeaderContainerStyle>
                                     <Style BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
                                         <Setter Property="IsHitTestVisible" Value="False"/>

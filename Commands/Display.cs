@@ -1,73 +1,40 @@
 ﻿using System;
 using System.IO;
-using zhsub.Models;
-using zhsub.Models.Files;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace zhsub.Commands
 {
     class Display
     {
-        public static void SubtitleFile(Tuple<string, string> tuple, ListView listView)
+        public static void FileName(Window window, string fileName)
         {
-            List.Srt.Clear();
-            listView.ItemsSource = null; // reset listview
+            if (fileName == null) return;
 
-            if (tuple.Item1.EndsWith(".srt"))
-            {
-
-                listView.ItemsSource = List.Srt;
-            }
-
-            if (tuple.Item1.EndsWith(".lrc"))
-                LrcFile(tuple.Item2);
+            window.Title = fileName[(fileName.LastIndexOf('\\') + 1)..] + " - Zither Harp Subtitles 1.0.0";
         }
 
-        public static void LrcFile(string text)
+        public static void Video(MediaElement mediaElement, DockPanel dockPanel, string fileName)
         {
-            var sr = new StringReader(text);
+            mediaElement.Source = new Uri(fileName);
+            mediaElement.Visibility = Visibility.Visible;
+            dockPanel.Visibility = Visibility.Visible;
 
-            string line;
-
-            while ((line = sr.ReadLine()) != null)
-            {
-                var lrc = new Lrc()
-                {
-                    Time = line.Substring(line.IndexOf('[') + 1, line.IndexOf(']') - 1),
-                    Text = line.Substring(line.IndexOf(']') + 1)
-                };
-
-                List.Lrc.Add(lrc);
-            }
+            mediaElement.Play();
+            mediaElement.Pause();
         }
 
-        public static void SrtFile(GridView gridView)
+        public static void VideoSlider(MediaElement mediaElement, Slider slider)
         {
-            gridView.Columns.Clear();
+            slider.TickFrequency = mediaElement.Position.TotalSeconds / 10;
 
-            var columns = new GridViewColumn[]
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+
+            timer.Tick += (s, e) =>
             {
-                new GridViewColumn() { Header = "Index", Width = 50 },
-                new GridViewColumn() { Header = "Start", Width = 100 },
-                new GridViewColumn() { Header = "End", Width = 100 },
-                new GridViewColumn() { Header = "CPS", Width = 50 },
-                new GridViewColumn() { Header = "Text", Width = 470 }
+                slider.Value += 1;
             };
-
-            foreach (var column in columns)
-            {
-                gridView.Columns.Add(column);
-            }
-            
-
-        }
-
-        public static void Video(string filePath, MediaElement mediaElement)
-        {
-            if (filePath == null) return;
-
-            mediaElement.Visibility = System.Windows.Visibility.Visible;
-            mediaElement.Source = new Uri(filePath);
         }
     }
 }

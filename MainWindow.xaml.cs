@@ -1,35 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using zhsub.Models;
-using zhsub.Models.Files;
-using zhsub.Boundaries;
 using zhsub.Commands;
-using System.Linq;
 using zhsub.Features;
 using System.Net;
+using zhsub.Models.Files;
 
 namespace zhsub
 {
     public partial class MainWindow : Window
     {
+        public static string EditingFileName;
+
         public MainWindow()
         {
             InitializeComponent();
-
-            List.Srt.Add(new Srt()
-            {
-                Index = 1,
-                StartTime = new TimeSpan(0, 0, 0, 0, 0),
-                EndTime = new TimeSpan(0, 0, 0, 5, 0),
-                Text = null
-            });
-
-            lvSrtFile.ItemsSource = List.Srt;
-            lvSrtFile.SelectedIndex = 0;
+            Hotkeys();
         }
 
         private void btnDownload_Click(object sender, RoutedEventArgs e)
@@ -67,11 +54,80 @@ namespace zhsub
                 griEditor.Visibility = Visibility.Visible;
                 griSearch.Visibility = Visibility.Collapsed;
                 tbxInput.Text = null;
-                List.Srt.Clear();
                 Conversion.LrcToSrt(new WebClient().DownloadString("https://www.kugeci.com/download/lrc/" + selectedResult.ID));
 
-                lvSrtFile.ItemsSource = null;
-                lvSrtFile.ItemsSource = List.Srt;
+                lvEditor.ItemsSource = null;
+                lvEditor.ItemsSource = List.Srt;
+                
+            }
+        }
+
+        private void Hotkeys()
+        {
+            var cutListViewItem = new RoutedCommand();
+            var copyListViewItem = new RoutedCommand();
+            var pasteListViewItem = new RoutedCommand();
+
+            cutListViewItem.InputGestures.Add(new KeyGesture(Key.X, ModifierKeys.Control));
+            copyListViewItem.InputGestures.Add(new KeyGesture(Key.C, ModifierKeys.Control));
+            pasteListViewItem.InputGestures.Add(new KeyGesture(Key.V, ModifierKeys.Control));
+
+            CommandBindings.Add(new CommandBinding(cutListViewItem, Cut_ListViewItem));
+            CommandBindings.Add(new CommandBinding(copyListViewItem, Copy_ListViewItem));
+            CommandBindings.Add(new CommandBinding(pasteListViewItem, Paste_ListViewItem));
+        }
+
+        private void Cut_ListViewItem(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (lvEditor.SelectedItem == null) return;
+
+            if (lvEditor.SelectedItem is Srt)
+            {
+                var srt = (lvEditor.SelectedItem as Srt).StartTime + "," + (lvEditor.SelectedItem as Srt).EndTime + "," + (lvEditor.SelectedItem as Srt).Text;
+                List.Srt.Remove(lvEditor.SelectedItem as Srt);
+                Sort.SrtList(lvEditor.SelectedIndex, false);
+                Sort.SrtList(lvEditor.SelectedIndex, true);
+                lvEditor.Items.Refresh();
+                Clipboard.SetText(srt);
+            }
+        }
+
+        private void Copy_ListViewItem(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (lvEditor.SelectedItem == null) return;
+
+            if (lvEditor.SelectedItem is Srt)
+            {
+                var srt = (lvEditor.SelectedItem as Srt).StartTime + "," + (lvEditor.SelectedItem as Srt).EndTime + "," + (lvEditor.SelectedItem as Srt).Text;
+                Clipboard.SetText(srt);
+            }       
+        }
+
+        private void Paste_ListViewItem(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (lvEditor.SelectedItem == null) return;
+
+            if (lvEditor.SelectedItem is Srt)
+            {
+                var srtItems = Clipboard.GetText().Split(',');
+
+                string text = null;
+
+                for (int i = 2; i <srtItems.Length; i++)
+                {
+                    text += srtItems[i];
+                }   
+                
+                List.Srt.Insert(lvEditor.SelectedIndex, new Srt()
+                {
+                    Index = lvEditor.SelectedIndex + 1,
+                    StartTime = srtItems[0],
+                    EndTime = srtItems[1],
+                    Text = text
+                });
+
+                Sort.SrtList(lvEditor.SelectedIndex + 1, true);
+                lvEditor.Items.Refresh();
             }
         }
 
@@ -85,57 +141,23 @@ namespace zhsub
 
         private void MenuItem_File_Click(object sender, RoutedEventArgs e)
         {
-            var menuItem = sender as MenuItem;
-
-            switch (menuItem.Header)
-            {
-                case "_New":
-                    lvSrtFile.ItemsSource = null;
-                    List.Srt.Clear();
-                    break;
-                case "_Open":
-                    Display.SubtitleFile(Open.Subtitle(), lvSrtFile);
-                    break;
-                case "_Save":
-                    Save.Subtitle(lvSrtFile);
-                    break;
-                case "Save _As":
-                    Save.Subtitle(lvSrtFile);
-                    break;
-                case "New Window":
-                    Show();
-                    break;
-                case "Exit":
-                    Close();
-                    break;
-            }
+            MenuItemCommand.File(sender as MenuItem, this, lvEditor, gvEditor);
         }
 
         private void MenuItem_Video_Click(object sender, RoutedEventArgs e)
         {
-            var menuItem = sender as MenuItem;
+            MenuItemCommand.Video(sender as MenuItem, mdeVideo, dpaVideo);
+        }
 
-            switch (menuItem.Header)
-            {
-                case "Open":
-                    Open.Video(mdeVideo);
-                    mdeVideo.Visibility = Visibility.Visible;
-                    tbtVideo.Visibility = Visibility.Visible;
-                    mdeVideo.Play();
-                    mdeVideo.Pause();
-                    break;
-                case "Close":
-                    mdeVideo.Source = null;
-                    mdeVideo.Visibility = Visibility.Collapsed;
-                    tbtVideo.Visibility = Visibility.Collapsed;
-                    break;
-            }
+        private void MenuItem_Subtitle_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItemCommand.Subtitle(sender as MenuItem, lvEditor);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
-            
+
             switch(button.Name)
             {
                 case "btnInsertBefore":
@@ -154,12 +176,13 @@ namespace zhsub
 
             if (button == btnPlay)
             {
-                mdeVideo.Play();
+                Video.Timer(mdeVideo, sliDuration);
+                Video.Play(mdeVideo);
             }
             
             if (button == btnPause)
             {
-                mdeVideo.Pause();
+                Video.Pause(mdeVideo);
             } 
             
             if (button == btnPlayLine)
@@ -169,5 +192,7 @@ namespace zhsub
                 
             }    
         }
+
+        
     }
 }

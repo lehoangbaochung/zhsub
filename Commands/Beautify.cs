@@ -7,10 +7,21 @@ namespace zhsub.Features
     {
         public static void TrimLines(ListView listView)
         {
-            foreach (Srt item in listView.Items)
+            if (listView.Items.SourceCollection is Srt)
             {
-                item.Text = item.Text.ToString().Trim();
-            }    
+                foreach (Srt item in listView.Items)
+                {
+                    item.Text = item.Text.ToString().Trim();
+                }
+            }
+
+            if (listView.Items.SourceCollection is Lrc)
+            {
+                foreach (Lrc item in listView.Items)
+                {
+                    item.Text = item.Text.ToString().Trim();
+                }
+            }
         }
 
         public static void TimeFormat(ListView listView)

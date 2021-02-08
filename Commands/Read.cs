@@ -1,36 +1,66 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Windows.Controls;
+﻿using zhsub.Models;
 using zhsub.Models.Files;
 
 namespace zhsub.Commands
 {
     class Read
     {
-        public static void SrtFile(string text, ref ListView listView)
+        public static void SrtFile(string fileData)
         {
-            var sr = new StringReader(text);
+            List.Srt.Clear();
 
-            string line;
+            var lineArray = fileData.Split("\r\n\r\n");
 
-            var list = new List<string>();
-
-            while ((line = sr.ReadLine()) != null)
+            foreach (var line in lineArray)
             {
-                list.Add(line);
-            }
+                var itemArray = line.Split("\r\n");
 
-            for (int i = 0; i < list.Count; i += 4)
-            {
+                if (itemArray.Length < 3) return;
+
+                string text = itemArray[2];
+
+                if (itemArray.Length > 3)
+                {
+                    for (int i = 3; i < itemArray.Length; i++)
+                    {
+                        text += "\n" + itemArray[i];
+                    }
+                }    
+
                 var srt = new Srt()
                 {
-                    Index = list[i],
-                    StartTime = list[i + 1].Substring(0, list[i + 1].IndexOf('-') - 1).Replace(',', '.'),
-                    EndTime = list[i + 1][(list[i + 1].IndexOf('>') + 2)..].Replace(',', '.'),
-                    Text = list[i + 2]
+                    Index = itemArray[0],
+                    StartTime = itemArray[1].Substring(0, itemArray[1].IndexOf('-') - 1).Replace(',', '.'),
+                    EndTime = itemArray[1][(itemArray[1].IndexOf('>') + 2)..].Replace(',', '.'),
+                    Text = text.Trim()
                 };
 
-                listView.Items.Add(srt);
+                List.Srt.Add(srt);
+            }   
+        }
+
+        public static void LrcFile(string fileData)
+        {
+            List.Lrc.Clear();
+
+            var lineArray = fileData.Trim().Split("\n");
+
+            string text;
+
+            foreach (var line in lineArray)
+            {
+                if (line.Length == line.IndexOf(']'))
+                    text = line + " ";
+                else
+                    text = line[(line.IndexOf(']') + 1)..];
+
+                var lrc = new Lrc()
+                {
+                    Time = line.Substring(line.IndexOf('[') + 1, line.IndexOf(']') - 1),
+                    Text = text.Trim()
+                };
+
+                List.Lrc.Add(lrc);                
             }
         }
     }

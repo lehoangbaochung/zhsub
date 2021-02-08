@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using zhsub.Models;
 using zhsub.Models.Files;
 
@@ -102,36 +98,41 @@ namespace zhsub.Features
                 List.Srt.Add(srt);
             }
         }
+        
+        public static void LrcToSrt()
+        {
+            List.Srt.Clear();
 
-        //public static void Lrc(string text)
-        //{
-        //    var sr = new StringReader(text);
+            for (int i = 0; i < List.Lrc.Count - 1; i++)
+            {
+                var srt = new Srt()
+                {
+                    Index = i + 1,
+                    StartTime = List.Lrc[i].Time.ToString()
+                        .Substring(List.Lrc[i].Time.ToString().IndexOf('[') + 1, List.Lrc[i].Time.ToString().IndexOf(']') - 1),
+                    EndTime = List.Lrc[i + 1].Time.ToString()
+                        .Substring(List.Lrc[i + 1].Time.ToString().IndexOf('[') + 1, List.Lrc[i + 1].Time.ToString().IndexOf(']') - 1),
+                    Text = List.Lrc[i].Text.ToString().Substring(List.Lrc[i].Text.ToString().IndexOf(']') + 1)
+                };
 
-        //    string line;
+                List.Srt.Add(srt);
+            }
+        }
 
-        //    List<string> lineList = new List<string>();
+        public static void SrtToLrc()
+        {
+            List.Lrc.Clear();
 
-        //    while ((line = sr.ReadLine()) != null)
-        //    {
-        //        lineList.Add(line);
-        //    }
+            foreach (var item in List.Srt)
+            {
+                var lrc = new Lrc()
+                {
+                    Time = item.StartTime,
+                    Text = item.Text
+                };
 
-        //    for (int i = 0; i < lineList.Count; i++)
-        //    {
-        //        var srt = new Srt()
-        //        {
-        //            Index = 1,
-        //            StartTime = lineList[i].Substring(lineList[i].IndexOf('[') + 1, lineList[i].IndexOf(']') - 1),
-        //            Text = lineList[i].Substring(lineList[i].IndexOf(']') + 1)
-        //        };
-
-        //        if (i + 1 < lineList.Count)
-        //            srt.EndTime = lineList[i + 1].Substring(lineList[i + 1].IndexOf('[') + 1, lineList[i + 1].IndexOf(']') - 1);
-        //        else
-        //            srt.EndTime = srt.StartTime;
-
-        //        ViewModel.SrtList.Add(srt);
-        //    }    
-        //}
+                List.Lrc.Add(lrc);
+            }    
+        }
     }
 }
