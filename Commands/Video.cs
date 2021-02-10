@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using zhsub.Models;
 
 namespace zhsub.Commands
 {
@@ -10,21 +11,29 @@ namespace zhsub.Commands
     {
         static DispatcherTimer timer;
 
-        public static void Timer(MediaElement mediaElement, Slider slider)
+        public static void Timer(MediaElement mediaElement, Slider slider, ListView listView, TextBlock textBlock)
         {
-            slider.TickFrequency = mediaElement.NaturalDuration.TimeSpan.TotalSeconds / 60;
             slider.Maximum = mediaElement.NaturalDuration.TimeSpan.TotalSeconds;
+            slider.TickFrequency = slider.Maximum / 60;
 
-            timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1) };
+            timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(0.001) };
 
             timer.Tick += (s, e) =>
             {
                 slider.Value = mediaElement.Position.TotalSeconds;
+
+                if (mediaElement.Position.ToString().Length < 12) return;
+
+                ////var start = List.Srt.Find(s => s.StartTime.ToString() == mediaElement.Position.ToString().Remove(12));
+
+                //if (start == null) return;
+
+                //textBlock.Text = start.Text.ToString();
             };
 
-            slider.ValueChanged += (s, e) =>
+            slider.IsEnabledChanged += (s, e) =>
             {
-                mediaElement.Position = new TimeSpan(0, 0, 0);
+                mediaElement.Position = new TimeSpan(0, 0, (int)slider.Value / 60, (int)slider.Value % 60);
             };
         }
 

@@ -142,8 +142,7 @@
                                 </TextBlock>
                             </Grid>
                             <Slider x:Name="sliDuration" DockPanel.Dock="Top" TickPlacement="TopLeft" Foreground="Black"
-                                    IsSnapToTickEnabled="True" ToolTip="Seek video" Value="0"
-                                    />
+                                    ToolTip="Seek video" />
                             <ToolBarTray DockPanel.Dock="Left" IsLocked="True" Background="Yellow" >
                                 <ToolBar HorizontalAlignment="Center" >
                                     <Button x:Name="btnPlay" Click="ButtonControl_Click" ToolTip="Play video starting on this position">▷</Button>
@@ -204,7 +203,7 @@
                     <ListView x:Name="lvEditor" Width="780" FontSize="14" SelectionMode="Extended" 
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <ListView.View>
-                            <GridView x:Name="gvEditor">
+                            <GridView x:Name="gvEditor" >
                                 <GridView.ColumnHeaderContainerStyle>
                                     <Style BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
                                         <Setter Property="IsHitTestVisible" Value="False"/>

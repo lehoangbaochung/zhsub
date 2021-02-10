@@ -5,7 +5,6 @@ using zhsub.Models;
 using zhsub.Commands;
 using zhsub.Features;
 using System.Net;
-using zhsub.Models.Files;
 
 namespace zhsub
 {
@@ -16,6 +15,7 @@ namespace zhsub
         public MainWindow()
         {
             InitializeComponent();
+            //Event.ListViewItem_SelectionChanged(lvEditor, mdeVideo, sliDuration);
             Hotkeys();
         }
 
@@ -40,7 +40,7 @@ namespace zhsub
             griEditor.Visibility = Visibility.Collapsed;
             griSearch.Visibility = Visibility.Visible;
 
-            lvSearch.ItemsSource = Bind.Kugeci(Crawl.Kugeci(tbxSearch.Text));
+            //lvSearch.ItemsSource = Bind.Kugeci(Crawl.Kugeci(tbxSearch.Text));
         }
 
         private void ListViewItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -54,10 +54,10 @@ namespace zhsub
                 griEditor.Visibility = Visibility.Visible;
                 griSearch.Visibility = Visibility.Collapsed;
                 tbxInput.Text = null;
-                Conversion.LrcToSrt(new WebClient().DownloadString("https://www.kugeci.com/download/lrc/" + selectedResult.ID));
+                //Conversion.LrcToSrt(new WebClient().DownloadString("https://www.kugeci.com/download/lrc/" + selectedResult.ID));
 
                 lvEditor.ItemsSource = null;
-                lvEditor.ItemsSource = List.Srt;
+                //lvEditor.ItemsSource = List.Srt;
                 
             }
         }
@@ -72,64 +72,64 @@ namespace zhsub
             copyListViewItem.InputGestures.Add(new KeyGesture(Key.C, ModifierKeys.Control));
             pasteListViewItem.InputGestures.Add(new KeyGesture(Key.V, ModifierKeys.Control));
 
-            CommandBindings.Add(new CommandBinding(cutListViewItem, Cut_ListViewItem));
-            CommandBindings.Add(new CommandBinding(copyListViewItem, Copy_ListViewItem));
-            CommandBindings.Add(new CommandBinding(pasteListViewItem, Paste_ListViewItem));
+            //CommandBindings.Add(new CommandBinding(cutListViewItem, Cut_ListViewItem));
+            //CommandBindings.Add(new CommandBinding(copyListViewItem, Copy_ListViewItem));
+            //CommandBindings.Add(new CommandBinding(pasteListViewItem, Paste_ListViewItem));
         }
 
-        private void Cut_ListViewItem(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (lvEditor.SelectedItem == null) return;
+        //private void Cut_ListViewItem(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    if (lvEditor.SelectedItem == null) return;
 
-            if (lvEditor.SelectedItem is Srt)
-            {
-                var srt = (lvEditor.SelectedItem as Srt).StartTime + "," + (lvEditor.SelectedItem as Srt).EndTime + "," + (lvEditor.SelectedItem as Srt).Text;
-                List.Srt.Remove(lvEditor.SelectedItem as Srt);
-                Sort.SrtList(lvEditor.SelectedIndex, false);
-                Sort.SrtList(lvEditor.SelectedIndex, true);
-                lvEditor.Items.Refresh();
-                Clipboard.SetText(srt);
-            }
-        }
+        //    if (lvEditor.SelectedItem is Srt)
+        //    {
+        //        var srt = (lvEditor.SelectedItem as Srt).StartTime + "," + (lvEditor.SelectedItem as Srt).EndTime + "," + (lvEditor.SelectedItem as Srt).Text;
+        //        List.Srt.Remove(lvEditor.SelectedItem as Srt);
+        //        Sort.SrtList(lvEditor.SelectedIndex, false);
+        //        Sort.SrtList(lvEditor.SelectedIndex, true);
+        //        lvEditor.Items.Refresh();
+        //        Clipboard.SetText(srt);
+        //    }
+        //}
 
-        private void Copy_ListViewItem(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (lvEditor.SelectedItem == null) return;
+        //private void Copy_ListViewItem(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    if (lvEditor.SelectedItem == null) return;
 
-            if (lvEditor.SelectedItem is Srt)
-            {
-                var srt = (lvEditor.SelectedItem as Srt).StartTime + "," + (lvEditor.SelectedItem as Srt).EndTime + "," + (lvEditor.SelectedItem as Srt).Text;
-                Clipboard.SetText(srt);
-            }       
-        }
+        //    if (lvEditor.SelectedItem is Srt)
+        //    {
+        //        var srt = (lvEditor.SelectedItem as Srt).StartTime + "," + (lvEditor.SelectedItem as Srt).EndTime + "," + (lvEditor.SelectedItem as Srt).Text;
+        //        Clipboard.SetText(srt);
+        //    }       
+        //}
 
-        private void Paste_ListViewItem(object sender, ExecutedRoutedEventArgs e)
-        {
-            if (lvEditor.SelectedItem == null) return;
+        //private void Paste_ListViewItem(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    if (lvEditor.SelectedItem == null) return;
 
-            if (lvEditor.SelectedItem is Srt)
-            {
-                var srtItems = Clipboard.GetText().Split(',');
+        //    if (lvEditor.SelectedItem is Srt)
+        //    {
+        //        var srtItems = Clipboard.GetText().Split(',');
 
-                string text = null;
+        //        string text = null;
 
-                for (int i = 2; i <srtItems.Length; i++)
-                {
-                    text += srtItems[i];
-                }   
+        //        for (int i = 2; i <srtItems.Length; i++)
+        //        {
+        //            text += srtItems[i];
+        //        }   
                 
-                List.Srt.Insert(lvEditor.SelectedIndex, new Srt()
-                {
-                    Index = lvEditor.SelectedIndex + 1,
-                    StartTime = srtItems[0],
-                    EndTime = srtItems[1],
-                    Text = text
-                });
+        //        List.Srt.Insert(lvEditor.SelectedIndex, new Srt()
+        //        {
+        //            Index = lvEditor.SelectedIndex + 1,
+        //            StartTime = srtItems[0],
+        //            EndTime = srtItems[1],
+        //            Text = text
+        //        });
 
-                Sort.SrtList(lvEditor.SelectedIndex + 1, true);
-                lvEditor.Items.Refresh();
-            }
-        }
+        //        Sort.SrtList(lvEditor.SelectedIndex + 1, true);
+        //        lvEditor.Items.Refresh();
+        //    }
+        //}
 
         private void tbxStartTime_KeyDown(object sender, KeyEventArgs e)
         {
@@ -176,13 +176,15 @@ namespace zhsub
 
             if (button == btnPlay)
             {
-                Video.Timer(mdeVideo, sliDuration);
+                Video.Timer(mdeVideo, sliDuration, lvEditor, txbSubtitle);
                 Video.Play(mdeVideo);
+                sliDuration.IsEnabled = false;
             }
             
             if (button == btnPause)
             {
                 Video.Pause(mdeVideo);
+                sliDuration.IsEnabled = true;
             } 
             
             if (button == btnPlayLine)
@@ -192,7 +194,5 @@ namespace zhsub
                 
             }    
         }
-
-        
     }
 }

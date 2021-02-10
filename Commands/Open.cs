@@ -11,40 +11,40 @@ namespace zhsub.Commands
     {
         static string PrevSubtitleFileFormat = ".*";
 
-        public static void Subtitle(ListView listView, GridView gridView)
-        {
-            var openFileDialog = new OpenFileDialog() { Filter = "SubRip files (*.srt)|*.srt|Lyric files (*.lrc)|*.lrc" };
+        //public static void subtitle(listview listview, gridview gridview)
+        //{
+        //    var openfiledialog = new openfiledialog() { filter = "subrip files (*.srt)|*.srt|lyric files (*.lrc)|*.lrc" };
 
-            if (openFileDialog.ShowDialog() == false) return;
+        //    if (openfiledialog.showdialog() == false) return;
 
-            listView.ItemsSource = null;
-            listView.Items.Clear();
+        //    listview.itemssource = null;
+        //    listview.items.clear();
 
-            var fileName = openFileDialog.FileName;
+        //    var filename = openfiledialog.filename;
 
-            if (fileName.EndsWith(".srt"))
-            {
-                if (!fileName.EndsWith(PrevSubtitleFileFormat)) New.SrtFile(listView, gridView);
+        //    if (filename.endswith(".srt"))
+        //    {
+        //        if (!filename.endswith(prevsubtitlefileformat)) //new.srtfile(listview, gridview);
 
-                Read.SrtFile(File.ReadAllText(fileName));
-                listView.ItemsSource = List.Srt;
-            }
+        //            read.srtfile(file.readalltext(filename));
+        //        listview.itemssource = srt.list;
+        //    }
 
-            if (fileName.EndsWith(".lrc"))
-            {
-                if (!fileName.EndsWith(PrevSubtitleFileFormat)) New.LrcFile(listView, gridView);
+        //    if (filename.endswith(".lrc"))
+        //    {
+        //        if (!filename.endswith(prevsubtitlefileformat)) new.lrcfile(listview, gridview);
 
-                Read.LrcFile(File.ReadAllText(fileName));
-                listView.ItemsSource = List.Lrc;
-            }
+        //        read.lrcfile(system.io.file.readalltext(filename));
+        //        listview.itemssource = list.lrc;
+        //    }
 
-            PrevSubtitleFileFormat = fileName[fileName.LastIndexOf('.')..];
-            MainWindow.EditingFileName = fileName;
-        }
+        //    prevsubtitlefileformat = filename[filename.lastindexof('.')..];
+        //    mainwindow.editingfilename = filename;
+        //}
 
         public static void Video(MediaElement mediaElement, DockPanel dockPanel)
         {
-            var openFileDialog = new OpenFileDialog() { Filter = "Video files (*.mp4,*.flv,*.3gp,*.avi)|*.mp4;*.flv;*.3gp;*.avi" };
+            var openFileDialog = new OpenFileDialog() { Filter = "Video files (*.mp4,*.3gp,*.avi)|*.mp4;*.3gp;*.avi" };
 
             if (openFileDialog.ShowDialog() == false) return;
 

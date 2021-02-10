@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using zhsub.Models.SubtitleFiles;
+using zhsub.Models;
 
 namespace zhsub.Commands
 {
@@ -13,25 +15,24 @@ namespace zhsub.Commands
             switch (menuItem.Name)
             {
                 case "newSrtFile":
-                    New.SrtFile(listView, gridView);
-                    Insert.NewLine(listView, gridView);
+                    new Srt(listView, gridView, "", ""); 
                     Display.FileName(window, MainWindow.EditingFileName);
                     break;
                 case "newLrcFile":
                     New.LrcFile(listView, gridView);
-                    Insert.NewLine(listView, gridView);
+                    //Insert.NewLine(listView, gridView);
                     Display.FileName(window, MainWindow.EditingFileName);
                     break;
                 case "openSubtitle":
-                    Open.Subtitle(listView, gridView);
+                    new Subtitle(listView, gridView).Open();
                     Display.FileName(window, MainWindow.EditingFileName);
                     break;
                 case "saveSubtitle":
-                    Save.Subtitle();
+                    new Subtitle(listView, gridView).Save();
                     Display.FileName(window, MainWindow.EditingFileName);
                     break;
                 case "saveAsSubtitle":
-                    Save.Subtitle();
+                    //Save.Subtitle();
                     Display.FileName(window, MainWindow.EditingFileName);
                     break;
                 case "newWindow":
@@ -47,12 +48,12 @@ namespace zhsub.Commands
         {
             switch (menuItem.Name)
             {
-                case "insertBeforeLines":
-                    Insert.BeforeLine(listView);
-                    break;
-                case "insertAfterLines":
-                    Insert.AfterLine(listView);
-                    break;
+                //case "insertBeforeLines":
+                //    Insert.BeforeLine(listView);
+                //    break;
+                //case "insertAfterLines":
+                //    Insert.AfterLine(listView);
+                //    break;
             }
         }
 
