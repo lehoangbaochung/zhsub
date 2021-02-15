@@ -8,10 +8,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_New" >
-                    <MenuItem Header="_SRT file" Name="newSrtFile" Click="MenuItem_File_Click" />
-                    <MenuItem Header="_LRC file" Name="newLrcFile" Click="MenuItem_File_Click" />
-                </MenuItem>
+                <MenuItem Header="_New" InputGestureText="Ctrl+N" Name="newSubtitle" Click="MenuItem_File_Click" ></MenuItem>
                 <MenuItem Header="_Open" InputGestureText="Ctrl+O" Name="openSubtitle" Click="MenuItem_File_Click" />
                 <MenuItem Header="_Save" InputGestureText="Ctrl+S" Name="saveSubtitle" Click="MenuItem_File_Click" />
                 <MenuItem Header="Save _as..." InputGestureText="Ctrl+Shift+S" Click="MenuItem_File_Click" />
@@ -34,18 +31,18 @@
             </MenuItem>
             <MenuItem Header="_Line">
                 <MenuItem Header="_Insert" >
-                    <MenuItem Header="_Before current" Name="insertBeforeLines" Click="MenuItem_Subtitle_Click"></MenuItem>
-                    <MenuItem Header="_After current" Name="insertAfterLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                    <MenuItem Header="_Before current" Name="insertBeforeLine" Click="MenuItem_Line_Click"></MenuItem>
+                    <MenuItem Header="_After current" Name="insertAfterLine" Click="MenuItem_Line_Click"></MenuItem>
                 </MenuItem>
-                <MenuItem Header="D_uplicate" Name="duplicateLines" Click="MenuItem_Subtitle_Click" />
-                <MenuItem Header="_Delete" Name="deleteLines" Click="MenuItem_Subtitle_Click" />
+                <MenuItem Header="D_uplicate" Name="duplicateLines" Click="MenuItem_Line_Click" />
+                <MenuItem Header="_Delete" Name="deleteLines" Click="MenuItem_Line_Click" />
                 <MenuItem Header="_Sort" >
-                    <MenuItem Header="_Selected lines" Name="sortSelectedLines" Click="MenuItem_Subtitle_Click"></MenuItem>
-                    <MenuItem Header="_All lines" Name="sortAllLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                    <MenuItem Header="_Selected lines" Name="sortSelectedLines" Click="MenuItem_Line_Click"></MenuItem>
+                    <MenuItem Header="_All lines" Name="sortAllLines" Click="MenuItem_Line_Click"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="S_elect" >
-                    <MenuItem Header="_Match lines" Name="selectMatchLines" Click="MenuItem_Subtitle_Click"></MenuItem>
-                    <MenuItem Header="_All lines" Name="selectAllLines" Click="MenuItem_Subtitle_Click"></MenuItem>
+                    <MenuItem Header="_Match lines" Name="selectMatchLines" Click="MenuItem_Line_Click"></MenuItem>
+                    <MenuItem Header="_All lines" Name="selectAllLines" Click="MenuItem_Line_Click"></MenuItem>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="_Timing">
@@ -83,27 +80,19 @@
                 <MenuItem Header="_About" />
             </MenuItem>
         </Menu>
-            
-        <ToolBarTray DockPanel.Dock="Top" IsLocked="True" >
+
+        <ToolBarTray DockPanel.Dock="Top" IsLocked="True" HorizontalAlignment="Stretch">
             <ToolBar>
-                <Button Command="New" ToolTip="New subtiltes (Ctrl+N)">New</Button>
-                <Button x:Name="btnOpenFile" Command="Open" ToolTip="Open a subtitles file (Ctrl+O)">Open</Button>
-                <Button Command="Save" ToolTip="Save current subtitles (Ctrl+S)">Save</Button>
-                <Separator />
-                <Button Command="Cut" ToolTip="Cut selection to Windows Clipboard">Cut</Button>
-                <Button Command="Copy" ToolTip="Copy selection to Windows Clipboard">Copy</Button>
-                <Button Command="Paste" ToolTip="Paste from Windows Clipboard">Paste</Button>
+                <Button x:Name="btnBack" Content="Back" IsEnabled="{Binding ElementName=griSearch, Path=IsVisible}" ></Button>
+                <Button x:Name="btnForward" IsEnabled="{Binding ElementName=griEditor, Path=IsVisible}" >Forward</Button>
+                <Label Margin="205 0 0 0">Keyword:</Label>
+                <TextBox x:Name="tbxSearch" Width="500"></TextBox>
+                <Button x:Name="btnSearch" Click="btnSearch_Click">Search</Button>
             </ToolBar>
         </ToolBarTray>
 
-        <DockPanel DockPanel.Dock="Top">
-            <Label>Keyword:</Label>
-            <TextBox x:Name="tbxSearch" Width="500"></TextBox>
-            <Button x:Name="btnSearch" Click="btnSearch_Click">Search</Button>
-        </DockPanel>
-
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>Line 234, Column 12</StatusBarItem>
+            <StatusBarItem>Line 34, Column 12</StatusBarItem>
             <StatusBarItem>
                 <ProgressBar Value="100" Width="200" Height="10"></ProgressBar>
             </StatusBarItem>
@@ -116,10 +105,17 @@
             <DockPanel>
                 <ToolBarTray x:Name="tbtEditor" DockPanel.Dock="Top" IsLocked="True">
                     <ToolBar DockPanel.Dock="Bottom">
+                        <Button Command="New" ToolTip="New subtiltes (Ctrl+N)">New</Button>
+                        <Button x:Name="btnOpenFile" Command="Open" ToolTip="Open a subtitles file (Ctrl+O)">Open</Button>
+                        <Button Command="Save" ToolTip="Save current subtitles (Ctrl+S)">Save</Button>
+                        <Separator />
+                        <Button Command="Cut" ToolTip="Cut selection to Windows Clipboard">Cut</Button>
+                        <Button Command="Copy" ToolTip="Copy selection to Windows Clipboard">Copy</Button>
+                        <Button Command="Paste" ToolTip="Paste from Windows Clipboard">Paste</Button>
                         <Button x:Name="btnInsertBefore" Click="Button_Click" ToolTip="Insert a line before current line">Insert (before)</Button>
                         <Button x:Name="btnInsertAfter" Click="Button_Click" ToolTip="Insert a line after current line">Insert (after)</Button>
                         <Button x:Name="btnDuplicateLine" Click="Button_Click" ToolTip="Duplicate lines">Duplicate lines</Button>
-                        <Button x:Name="btnCut" Click="Button_Click" ToolTip="Duplicate lines">Cut</Button>
+                        <Button x:Name="btnCut" Click="Button_Click" ToolTip="Duplicate lines">Cute</Button>
                         <Button x:Name="btnCopy" Click="Button_Click" ToolTip="Duplicate lines">Copy</Button>
                         <Button x:Name="btnPaste" Click="Button_Click" ToolTip="Duplicate lines">Paste</Button>
                         <Button x:Name="btnInsertSub" Click="Button_Click" ToolTip="Duplicate lines">Add vietsub line</Button>
@@ -131,10 +127,10 @@
                 </ToolBarTray>
 
                 <DockPanel>
-                    <DockPanel DockPanel.Dock="Left" Width="575">
+                    <DockPanel x:Name="dpaEditor" DockPanel.Dock="Left" Width="575">
                         <DockPanel x:Name="dpaVideo" DockPanel.Dock="Top" Visibility="Collapsed">
                             <Grid DockPanel.Dock="Top">
-                                <MediaElement x:Name="mdeVideo" Height="325" Width="575" LoadedBehavior="Manual"></MediaElement>
+                                <MediaElement x:Name="mdeVideo" Height="325" LoadedBehavior="Manual"></MediaElement>
                                 <TextBlock x:Name="txbSubtitle" FontSize="16" Margin="0 0 0 5" TextAlignment="Center"
                                            Background="Black" Foreground="White" TextWrapping="WrapWithOverflow" 
                                            HorizontalAlignment="Center" VerticalAlignment="Bottom" 
@@ -143,28 +139,32 @@
                             </Grid>
                             <Slider x:Name="sliDuration" DockPanel.Dock="Top" TickPlacement="TopLeft" Foreground="Black"
                                     ToolTip="Seek video" />
-                            <ToolBarTray DockPanel.Dock="Left" IsLocked="True" Background="Yellow" >
-                                <ToolBar HorizontalAlignment="Center" >
-                                    <Button x:Name="btnPlay" Click="ButtonControl_Click" ToolTip="Play video starting on this position">▷</Button>
-                                    <Button x:Name="btnPlayLine" Click="ButtonControl_Click" ToolTip="Play current line">⏯</Button>
-                                    <Button x:Name="btnPause" Click="ButtonControl_Click" ToolTip="Pause video playback">⏸</Button>
-                                    <TextBox x:Name="txbCurrentTime" IsReadOnly="True" Text="{Binding Position.TotalSeconds, ElementName=mdeVideo, Mode=OneWay}"></TextBox>
-                                    <TextBox x:Name="txbRelativeTime" IsReadOnly="True" >+10677ms</TextBox>
+                            <ToolBarTray DockPanel.Dock="Left"  IsLocked="True" Background="Yellow" >
+                                <ToolBar >
+                                    <Button x:Name="btnPlay" Click="Button_Video_Click" ToolTip="Play video starting on this position">▷</Button>
+                                    <Button x:Name="btnPlayCurrentLine" Click="Button_Video_Click" ToolTip="Play current line">⏯</Button>
+                                    <Button x:Name="btnPause" Click="Button_Video_Click" ToolTip="Pause video playback">⏸</Button>
+                                    <Button x:Name="btnReplay" Click="Button_Video_Click" ToolTip="Re-play video from begin position">@</Button>
+                                    <Button x:Name="btnAutoSeek" Click="Button_Video_Click" ToolTip="Toggle automatically seek video to the start time of selected lines">Auto</Button>
+                                    <TextBox x:Name="txbCurrentTime" IsReadOnly="True" Width="180" ></TextBox>
+                                    <TextBox x:Name="txbRelativeTime" IsReadOnly="True" Width="100" ></TextBox>
+                                    <TextBlock x:Name="txbDuration" VerticalAlignment="Center" ></TextBlock>
                                     <Separator></Separator>
                                     <Label>Zoom:</Label>
-                                    <ComboBox>
-                                        <ComboBoxItem Tag="350">25%</ComboBoxItem>
-                                        <ComboBoxItem IsSelected="True">50%</ComboBoxItem>
+                                    <ComboBox x:Name="cbxZoom" IsEditable="False" >
+                                        <ComboBoxItem>50%</ComboBoxItem>
                                         <ComboBoxItem>75%</ComboBoxItem>
-                                        <ComboBoxItem>100%</ComboBoxItem>
+                                        <ComboBoxItem IsSelected="True">100%</ComboBoxItem>
+                                        <ComboBoxItem>125%</ComboBoxItem>
+                                        <ComboBoxItem>150%</ComboBoxItem>
                                     </ComboBox>
                                 </ToolBar>
                             </ToolBarTray>
                         </DockPanel>
-                        <TextBox x:Name="tbxInput" DockPanel.Dock="Bottom" Language="vi-VI"
+                        <TextBox x:Name="tbxInput" DockPanel.Dock="Bottom" Language="VI"
                                  SpellCheck.IsEnabled="True" TextWrapping="Wrap" AcceptsReturn="True"
                                  IsEnabled="{Binding ElementName=lvEditor, Path=IsEnabled}"
-                                 Text="{Binding ElementName=lvEditor, Path=SelectedItem.Text}"
+                                 Text="{Binding ElementName=lvEditor, Path=SelectedItem.Text, UpdateSourceTrigger=PropertyChanged}"
                                  FontFamily="{Binding ElementName=cbxFontFamily, Path=SelectionBoxItem}"
                                  FontSize="{Binding ElementName=cbxFontSize, Path=SelectionBoxItem}"
                                  FontStyle="{Binding ElementName=cbxFontStyle, Path=SelectionBoxItem}"
@@ -173,37 +173,50 @@
                         </TextBox>
                     </DockPanel>
 
-                    <ToolBarTray x:Name="tbtTime" DockPanel.Dock="Top" HorizontalAlignment="Center" IsLocked="True">
-                        <ToolBar>
-                            <TextBox x:Name="tbxTotalLines" ToolTip="Total lines" Margin="5 0 5 0" IsReadOnly="True" Text="{Binding ElementName=lvEditor, Path=Items.Count, Mode=OneWay}"></TextBox>
-                            <TextBox x:Name="tbxStartTime" ToolTip="Start time (SRT file)" Text="{Binding SelectedValue.StartTime, ElementName=lvEditor}"></TextBox>
-                            <TextBox x:Name="tbxEndTime" ToolTip="End time (SRT file)" Text="{Binding SelectedValue.EndTime, ElementName=lvEditor}"></TextBox>
-                            <TextBox x:Name="tbxDuration" ToolTip="Line duration (SRT file)"></TextBox>
-                            <TextBox x:Name="tbxTime" ToolTip="Time (LRC file)" Margin="5 0 5 0" Text="{Binding SelectedValue.Time, ElementName=lvEditor}"></TextBox>
-                            <Label>Font:</Label>
-                            <ComboBox x:Name="cbxFontFamily" ToolTip="Font" ItemsSource="{x:Static Fonts.SystemFontFamilies}" Text="Segoe UI" />
-                            <Label>Size:</Label>
-                            <ComboBox x:Name="cbxFontSize" ToolTip="Font size" >
-                                <ComboBoxItem IsSelected="True">16</ComboBoxItem>
-                                <ComboBoxItem>20</ComboBoxItem>
-                                <ComboBoxItem>42</ComboBoxItem>
-                                <ComboBoxItem>60</ComboBoxItem>
-                            </ComboBox>
-                            <Label>Style:</Label>
-                            <ComboBox x:Name="cbxFontStyle" ToolTip="Font style">
-                                <ComboBoxItem IsSelected="True">Normal</ComboBoxItem>
-                                <ComboBoxItem>Bold</ComboBoxItem>
-                                <ComboBoxItem>Italic</ComboBoxItem>
-                            </ComboBox>
-                            <Label>Find:</Label>
-                            <TextBox x:Name="tbxFind" Foreground="Gray">Hello!</TextBox>
-                        </ToolBar>
-                    </ToolBarTray>
-
+                    <DockPanel DockPanel.Dock="Top">
+                        <DockPanel DockPanel.Dock="Left" Background="SkyBlue">
+                            <TextBox x:Name="tbxTotalLines" ToolTip="Total lines" Margin="5 0 5 0" IsReadOnly="True" VerticalAlignment="Center" 
+                                     Text="{Binding ElementName=lvEditor, Path=Items.Count, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                            </TextBox>
+                            <TextBox x:Name="tbxStartTime" ToolTip="Start time" VerticalAlignment="Center" 
+                                     Text="{Binding ElementName=lvEditor, Path=SelectedItem.StartTime, UpdateSourceTrigger=PropertyChanged}">
+                            </TextBox>
+                            <TextBox x:Name="tbxEndTime" ToolTip="End time" VerticalAlignment="Center" 
+                                     Text="{Binding ElementName=lvEditor, Path=SelectedItem.EndTime, UpdateSourceTrigger=PropertyChanged}">
+                            </TextBox>
+                            <TextBox x:Name="tbxDuration" ToolTip="Line duration" VerticalAlignment="Center"></TextBox>
+                        </DockPanel>
+                        
+                        <ToolBarTray x:Name="tbtTime" DockPanel.Dock="Top" IsLocked="True" >
+                            <ToolBar>
+                                <Label>Font:</Label>
+                                <ComboBox x:Name="cbxFontFamily" ToolTip="Font" ItemsSource="{x:Static Fonts.SystemFontFamilies}" Text="Segoe UI" />
+                                <Label>Size:</Label>
+                                <ComboBox x:Name="cbxFontSize" ToolTip="Font size" >
+                                    <ComboBoxItem IsSelected="True">16</ComboBoxItem>
+                                    <ComboBoxItem>20</ComboBoxItem>
+                                    <ComboBoxItem>42</ComboBoxItem>
+                                    <ComboBoxItem>60</ComboBoxItem>
+                                </ComboBox>
+                                <Label>Style:</Label>
+                                <ComboBox x:Name="cbxFontStyle" ToolTip="Font style">
+                                    <ComboBoxItem IsSelected="True">Normal</ComboBoxItem>
+                                    <ComboBoxItem>Bold</ComboBoxItem>
+                                    <ComboBoxItem>Italic</ComboBoxItem>
+                                </ComboBox>
+                                <Label>Find:</Label>
+                                <TextBox x:Name="tbxFind" Foreground="Gray">Hello!</TextBox>
+                            </ToolBar>
+                        </ToolBarTray>
+                    </DockPanel>
+                    
                     <ListView x:Name="lvEditor" Width="780" FontSize="14" SelectionMode="Extended" 
                               ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <ListView.View>
                             <GridView x:Name="gvEditor" >
+                                <GridViewColumn Header="Start" Width="100" DisplayMemberBinding="{Binding StartTime}"></GridViewColumn>
+                                <GridViewColumn Header="End" Width="100" DisplayMemberBinding="{Binding EndTime}"></GridViewColumn>
+                                <GridViewColumn Header="Text" Width="600" DisplayMemberBinding="{Binding Text}"></GridViewColumn>
                                 <GridView.ColumnHeaderContainerStyle>
                                     <Style BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
                                         <Setter Property="IsHitTestVisible" Value="False"/>

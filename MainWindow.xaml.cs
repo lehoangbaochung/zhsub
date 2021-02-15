@@ -2,9 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using zhsub.Models;
-using zhsub.Commands;
-using zhsub.Features;
-using System.Net;
+using zhsub.Windows;
 
 namespace zhsub
 {
@@ -12,27 +10,21 @@ namespace zhsub
     {
         public static string EditingFileName;
 
+        public readonly Subtitle subtitle;
+        private readonly Line line;
+        private readonly Video video;
+
         public MainWindow()
         {
             InitializeComponent();
             //Event.ListViewItem_SelectionChanged(lvEditor, mdeVideo, sliDuration);
-            Hotkeys();
-        }
+            Event();
 
-        private void btnDownload_Click(object sender, RoutedEventArgs e)
-        {
-            var item = sender as ListViewItem;
+            subtitle = new Subtitle(this, lvEditor);
+            line = new Line(lvEditor);
+            video = new Video(dpaVideo, mdeVideo, sliDuration, txbCurrentTime, txbRelativeTime, cbxZoom, lvEditor, txbSubtitle);
 
-            if (item != null && item.IsSelected)
-            {
-                //var selectedResult = lvSearch.SelectedItems[0] as SearchResult;
-                //MessageBox.Show("Download " + selectedResult.ID + " successfully!", "Download", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        private void btnBookmark_Click(object sender, RoutedEventArgs e)
-        {
-            //throw new NotImplementedException();
+            subtitle.New();
         }
 
         private void btnSearch_Click(object sender, RoutedEventArgs e)
@@ -141,58 +133,134 @@ namespace zhsub
 
         private void MenuItem_File_Click(object sender, RoutedEventArgs e)
         {
-            MenuItemCommand.File(sender as MenuItem, this, lvEditor, gvEditor);
+            switch ((sender as MenuItem).Name)
+            {
+                case "newSubtitle":
+                    subtitle.New();
+                    break;
+                case "openSubtitle":
+                    subtitle.Open();
+                    break;
+                case "saveSubtitle":
+                    subtitle.Save();
+                    break;
+                case "saveAsSubtitle":
+                    //Save.Subtitle();
+                    break;
+                case "newWindow":
+                    Show();
+                    break;
+                case "closeWindow":
+                    Close();
+                    break;
+            }
         }
 
         private void MenuItem_Video_Click(object sender, RoutedEventArgs e)
         {
-            MenuItemCommand.Video(sender as MenuItem, mdeVideo, dpaVideo);
+            switch ((sender as MenuItem).Name)
+            {
+                case "openVideo":
+                    video.Open();
+                    break;
+                case "closeVideo":
+                    video.Close();
+                    break;
+            }
         }
 
-        private void MenuItem_Subtitle_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Line_Click(object sender, RoutedEventArgs e)
         {
-            MenuItemCommand.Subtitle(sender as MenuItem, lvEditor);
+            switch ((sender as MenuItem).Name)
+            {
+                case "insertBeforeLine":
+                    line.InsertBefore();
+                    break;
+                case "insertAfterLine":
+                    line.InsertAfter();
+                    break;
+                case "deleteLines":
+                    line.Delete();
+                    break;
+                case "duplicateLines":
+                    line.Duplicate();
+                    break;
+                case "selectAllLines":
+                    line.SelectAll();
+                    break;
+            }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-
-            switch(button.Name)
+            switch ((sender as Button).Name)
             {
-                case "btnInsertBefore":
-
-                    break;
-                case "btnInsertAfter":
-                    break;
-                case "btnTrim":
+                case "btnCut":
+                    subtitle.Translate("zh-CN", "zh-TW");
                     break;
             }
         }
 
-        private void ButtonControl_Click(object sender, RoutedEventArgs e)
+        private void Button_Video_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
-
-            if (button == btnPlay)
+            switch ((sender as Button).Name)
             {
-                Video.Timer(mdeVideo, sliDuration, lvEditor, txbSubtitle);
-                Video.Play(mdeVideo);
-                sliDuration.IsEnabled = false;
+                case "btnPlay":
+                    video.Play();
+                    break;
+                case "btnPause":
+                    video.Pause();
+                    break;
+                case "btnPlayCurrentLine":
+                    video.PlayCurrentLine();
+                    break;
             }
-            
-            if (button == btnPause)
+        }
+
+        private void Event()
+        {
+            cbxZoom.DropDownClosed += (s, e) =>
             {
-                Video.Pause(mdeVideo);
-                sliDuration.IsEnabled = true;
-            } 
-            
-            if (button == btnPlayLine)
-            {
-                //mdeVideo.Position = TimeSpan.Parse(tbxStartTime.Text);
-                
-                
-            }    
+                var ratio = double.Parse(cbxZoom.Text.Replace("%", "")) / 100;
+
+                dpaEditor.Width = 575 * ratio;
+                mdeVideo.Height = 325 * ratio;
+            };
+
+            //lvEditor.SelectionChanged += (s, e) =>
+            //{
+            //    if (lvEditor.SelectedItem is Models.SubtitleFiles.Srt)
+            //    {
+            //        var item = lvEditor.SelectedItem as Models.SubtitleFiles.Srt;
+
+            //        var hour = int.Parse(item.StartTime.ToString().Split(':')[0]);
+            //        var minute = int.Parse(item.StartTime.ToString().Split(':')[1]);
+            //        var second = int.Parse(item.StartTime.ToString().Split(':')[2].Split('.')[0]);
+            //        var millisecond = int.Parse(item.StartTime.ToString().Split(':')[2].Split('.')[1]);
+
+            //        mdeVideo.Position = new System.TimeSpan(0, hour, minute, second, millisecond);
+            //        sliDuration.Value = mdeVideo.Position.TotalSeconds;
+            //    }
+            //};
+
+            //sliDuration.ValueChanged += (s, e) =>
+            //{
+            //    foreach (Models.SubtitleFiles.Srt item in lvEditor.Items)
+            //    {
+            //        var hour = int.Parse(item.StartTime.ToString().Split(':')[0]);
+            //        var minute = int.Parse(item.StartTime.ToString().Split(':')[1]);
+            //        var second = int.Parse(item.StartTime.ToString().Split(':')[2].Split('.')[0]);
+            //        var millisecond = int.Parse(item.StartTime.ToString().Split(':')[2].Split('.')[1]);
+
+            //        var time = new System.TimeSpan(0, hour, minute, second, millisecond);
+
+            //        if (mdeVideo.Position == time)
+            //        {
+            //            txbSubtitle.Text = item.Text;
+            //            break;
+            //        }
+            //    }
+            //};
         }
     }
 }

@@ -9,7 +9,7 @@ namespace zhsub.Commands
 {
     class Open
     {
-        static string PrevSubtitleFileFormat = ".*";
+        //static string PrevSubtitleFileFormat = ".*";
 
         //public static void subtitle(listview listview, gridview gridview)
         //{
