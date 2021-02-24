@@ -42,19 +42,19 @@ namespace zhsub.Commands
         //    mainwindow.editingfilename = filename;
         //}
 
-        public static void Video(MediaElement mediaElement, DockPanel dockPanel)
+        public static void Video(MediaElement mdeVideo, DockPanel dockPanel)
         {
             var openFileDialog = new OpenFileDialog() { Filter = "Video files (*.mp4,*.3gp,*.avi)|*.mp4;*.3gp;*.avi" };
 
             if (openFileDialog.ShowDialog() == false) return;
 
             #region display video
-            mediaElement.Source = new Uri(openFileDialog.FileName);
-            mediaElement.Visibility = Visibility.Visible;
+            mdeVideo.Source = new Uri(openFileDialog.FileName);
+            mdeVideo.Visibility = Visibility.Visible;
             dockPanel.Visibility = Visibility.Visible;
 
-            mediaElement.Play();
-            mediaElement.Pause();
+            mdeVideo.Play();
+            mdeVideo.Pause();
             #endregion
         }
     }

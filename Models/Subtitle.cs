@@ -1,12 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
+using zhsub.Views;
 
 namespace zhsub.Models
 {
@@ -16,79 +14,11 @@ namespace zhsub.Models
 
     public class Subtitle
     {
-        #region protected properties
-        protected Window window;
-        protected ListView listView;
-        #endregion
-
-        #region private properties
-        private string _filePath;
-        private string _fileExtension;
-        private string _fileData;
-
-        private HttpClient httpClient;
-        #endregion
-
-        #region attributes
-        public event PropertyChangedEventHandler PropertyChanged;
-        private object _startTime, _endTime;
-        private string _text;
-
-        private void NotifyPropertyChanged(string propName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-        }
-
-        public object StartTime
-        {
-            get { return _startTime; }
-            set
-            {
-                if (_startTime != value)
-                {
-                    _startTime = value;
-                    NotifyPropertyChanged("StartTime");
-                }
-            }
-        }
-
-        public object EndTime
-        {
-            get { return _endTime; }
-            set
-            {
-                if (_endTime != value)
-                {
-                    _endTime = value;
-                    NotifyPropertyChanged("EndTime");
-                }
-            }
-        }
-
-        public string Text
-        {
-            get { return _text; }
-            set
-            {
-                if (_text != value)
-                {
-                    _text = value;
-                    NotifyPropertyChanged("Text");
-                }
-            }
-        }
-        #endregion
-
-        protected Dictionary<SubtitleExtension, SubtitleFormat> SubtitleDict;
-
-        protected Subtitle() { }
-
-        public Subtitle(Window window, ListView listView)
-        {
-            this.window = window;
-            this.listView = listView;
-
-            SubtitleDict = new Dictionary<SubtitleExtension, SubtitleFormat>
+        #region properties
+        public string FilePath { get; set; }
+        public string FileExtension { get; set; }
+        public string FileData { get; set; }
+        public Dictionary<SubtitleExtension, SubtitleFormat> SubtitleDictionary = new Dictionary<SubtitleExtension, SubtitleFormat>
             {
                 {
                     SubtitleExtension.SBV, new SubtitleFormat()
@@ -96,6 +26,7 @@ namespace zhsub.Models
                         LineSplitChar = "\r\n\r\n",
                         ItemSplitChar = "\r\n",
                         TimeSeparatorChar = ",",
+                        TimeFormat = "0:00:00.000",
                         LineStartIndex = 0,
                         ItemStartIndex = 0,
                         ItemCount = 2
@@ -107,6 +38,8 @@ namespace zhsub.Models
                         LineSplitChar = "\r\n\r\n",
                         ItemSplitChar = "\r\n",
                         TimeSeparatorChar = " --> ",
+                        TickSeparatorChar = ',',
+                        TimeFormat = "00:00:00,000",
                         LineStartIndex = 0,
                         ItemStartIndex = 1,
                         ItemCount = 3
@@ -118,6 +51,7 @@ namespace zhsub.Models
                         LineSplitChar = "\r\n\r\n",
                         ItemSplitChar = "\r\n",
                         TimeSeparatorChar = " --> ",
+                        TickSeparatorChar = '.',
                         LineStartIndex = 1,
                         ItemStartIndex = 0,
                         ItemCount = 2
@@ -128,30 +62,45 @@ namespace zhsub.Models
                     {
                         LineSplitChar = "\n",
                         TimeSeparatorChar = "]",
+                        TimeFormat = "00:00.00",
+                        TickSeparatorChar = '.',
                         LineStartIndex = 0,
                         ItemStartIndex = 0,
                         ItemCount = 1
                     }
                 }
             };
-        }    
 
-        public Subtitle(object startTime, object endTime, string text)
+        protected MainWindow mainWindow;
+
+        private HttpClient _httpClient;
+        private SubtitleTime time;
+        #endregion
+
+        public Subtitle(MainWindow mainWindow)
         {
-            _startTime = startTime;
-            _endTime = endTime;
-            _text = text;
-        }   
+            this.mainWindow = mainWindow;
+
+            time = new SubtitleTime();
+        }      
         
+        public void Convert(SubtitleExtension sourceSubtitle, SubtitleExtension convertSubtitle)
+        {
+            Import(sourceSubtitle);
+            Import(convertSubtitle);
+            Import(convertSubtitle);
+        }
+
         public void New()
         {
-            Refresh();
+            mainWindow.lvEditor.Items.Clear();
+            mainWindow.lvEditor.Items.Add(new SubtitleLine(1, "00:00:00.000", "00:00:05.000", ""));
 
-            listView.Items.Add(new Subtitle("0:00:00.000", "0:00:05.000", null));
-            listView.SelectedItem = listView.Items[0];
+            mainWindow.lvEditor.Focus();
+            mainWindow.lvEditor.SelectedItem = mainWindow.lvEditor.Items[0];
 
-            window.Title = "Untitled - Zither Harp Subtitles 1.0.0";
-        }
+            mainWindow.SetTitle("Untitled");
+        }  
 
         public void Open()
         {
@@ -162,12 +111,12 @@ namespace zhsub.Models
 
             if (openFileDialog.ShowDialog() == false) return;
 
-            _filePath = openFileDialog.FileName;
-            _fileExtension = _filePath[(_filePath.LastIndexOf('.') + 1)..];
-            _fileData = File.ReadAllText(_filePath);
-            Refresh();
+            FilePath = openFileDialog.FileName;
+            FileExtension = FilePath[(FilePath.LastIndexOf('.') + 1)..];
+            FileData = File.ReadAllText(FilePath);
+            mainWindow.lvEditor.Items.Clear();
 
-            switch (_fileExtension)
+            switch (FileExtension)
             {
                 case "lrc":
                     Export(SubtitleExtension.LRC);
@@ -183,32 +132,31 @@ namespace zhsub.Models
                     break;
             }
 
-            window.Title = $"{ _filePath[(_filePath.LastIndexOf('\\') + 1)..] } - Zither Harp Subtitles 1.0.0";
+            mainWindow.lvEditor.Focus();
+            mainWindow.lvEditor.SelectedItem = mainWindow.lvEditor.Items[0];
+            mainWindow.SetTitle(FilePath[(FilePath.LastIndexOf('\\') + 1)..]);
         }
 
-        private void Refresh()
+        public void Export(SubtitleExtension subtitleExtension)
         {
-            listView.ItemsSource = null;
-            listView.Items.Clear();
-        }
+            var subFormat = SubtitleDictionary[subtitleExtension];
 
-        private void Export(SubtitleExtension subtitleExtension)
-        {
-            var subFormat = SubtitleDict[subtitleExtension];
+            var lineArray = FileData.Trim().Split(subFormat.LineSplitChar);
 
-            var lineArray = _fileData.Split(subFormat.LineSplitChar);
+            int index = 1;
 
             if (subtitleExtension == SubtitleExtension.LRC)
             {
                 foreach (var line in lineArray)
                 {
-                    var subtitle = new Subtitle()
+                    var subtitle = new SubtitleLine()
                     {
+                        Index = index++,
                         StartTime = line[1..line.IndexOf(subFormat.TimeSeparatorChar)],
-                        Text = line[line.IndexOf(subFormat.TimeSeparatorChar)..].Replace(subFormat.LineSplitChar, "")
+                        Text = line[(line.IndexOf(subFormat.TimeSeparatorChar) + 1)..].Trim()
                     };
 
-                    listView.Items.Add(subtitle);
+                    mainWindow.lvEditor.Items.Add(subtitle);
                 }
             }
             else
@@ -219,53 +167,51 @@ namespace zhsub.Models
 
                     if (itemArray.Length < subFormat.ItemCount) return;
 
-                    _text = itemArray[subFormat.ItemCount - 1];
+                    string text = itemArray[subFormat.ItemCount - 1];
 
                     if (itemArray.Length > subFormat.ItemCount)
                     {
                         for (int j = subFormat.ItemCount; j < itemArray.Length; j++)
                         {
-                            _text += "\n" + itemArray[j];
+                            text += "\n" + itemArray[j].Trim();
                         }
                     }
 
-                    var subtitle = new Subtitle()
-                    {
-                        StartTime = itemArray[subFormat.ItemStartIndex]
-                            [0..itemArray[subFormat.ItemStartIndex].IndexOf(subFormat.TimeSeparatorChar)],
-                        EndTime = itemArray[subFormat.ItemStartIndex]
-                            [(itemArray[subFormat.ItemStartIndex].IndexOf(subFormat.TimeSeparatorChar) + subFormat.TimeSeparatorChar.Length - 1)..],
-                        Text = _text
-                    };
+                    var item = itemArray[subFormat.ItemStartIndex];
+                    var separator = subFormat.TimeSeparatorChar;
 
-                    listView.Items.Add(subtitle);
+                    var startTime = time.Format(item[0..item.IndexOf(separator)]);
+                    var endTime = time.Format(item[(item.IndexOf(separator) + separator.Length)..]);
+
+                    var subtitle = new SubtitleLine(index++, startTime, endTime, text);
+
+                    mainWindow.lvEditor.Items.Add(subtitle);
                 }
             }
         }
 
         private void Import(SubtitleExtension subtitleExtension)
         {
-            var subFormat = SubtitleDict[subtitleExtension];
+            var subFormat = SubtitleDictionary[subtitleExtension];
 
-            _fileData = null;
             int? index = null;
 
             if (subtitleExtension == SubtitleExtension.VTT)
             {
-                _fileData = "WEBVTT\nKind: captions\nLanguage: vi";
+                FileData = "WEBVTT\nKind: captions\nLanguage: vi\r\n\r\n";
             }
 
-            foreach (Subtitle item in listView.Items)
+            foreach (SubtitleLine line in mainWindow.lvEditor.Items)
             {
-                if (item.Text == null) return;
+                if (line.Text == null) return;
 
                 if (subtitleExtension == SubtitleExtension.SRT)
                 {
                     index++;
                 }
 
-                _fileData += index + $"{ item.StartTime }" + subFormat.TimeSeparatorChar 
-                    + $"{ item.EndTime }" + subFormat.ItemSplitChar + $"{ item.Text }" + subFormat.LineSplitChar;
+                FileData += index + $"{ line.StartTime }" + subFormat.TimeSeparatorChar 
+                    + $"{ line.EndTime }" + subFormat.ItemSplitChar + $"{ line.Text }" + subFormat.LineSplitChar;    
             }
         }
 
@@ -278,11 +224,11 @@ namespace zhsub.Models
 
             if (saveFileDialog.ShowDialog() == false) return;
 
-            _filePath = saveFileDialog.FileName;
-            _fileExtension = _filePath[(_filePath.LastIndexOf('.') + 1)..];
-            _fileData = null;
+            FilePath = saveFileDialog.FileName;
+            FileExtension = FilePath[(FilePath.LastIndexOf('.') + 1)..];
+            FileData = null;
 
-            switch (_fileExtension)
+            switch (FileExtension)
             {
                 case "lrc":
                     Import(SubtitleExtension.LRC);
@@ -298,33 +244,27 @@ namespace zhsub.Models
                     break;
             }
 
-            File.WriteAllText(_filePath, _fileData);
-            window.Title = $"{ _filePath[(_filePath.LastIndexOf('\\') + 1)..] } - Zither Harp Subtitles 1.0.0";
-        }
+            File.WriteAllText(FilePath, FileData.Trim());
 
-        public void TrimLines()
-        {
-            foreach (Subtitle item in listView.Items)
-            {
-                item.Text = item.Text.Trim();
-            }
+            mainWindow.lvEditor.Focus();
+            mainWindow.SetTitle(FilePath[(FilePath.LastIndexOf('\\') + 1)..]);
         }
 
         public void Translate(string sourceLanguage, string translateLanguage)
         {
-            httpClient = new HttpClient
+            _httpClient = new HttpClient
             {
                 BaseAddress = new Uri("https://translate.google.com/")
             };
 
             string text = null;
 
-            foreach (Subtitle item in listView.Items)
+            foreach (SubtitleLine item in mainWindow.lvEditor.Items)
             {
                 text += item.Text + "\n";
             }    
 
-            string result = httpClient.GetStringAsync("?sl=" + sourceLanguage + "&tl=" + translateLanguage + "&text=" + text + "&op=translate").Result;
+            string result = _httpClient.GetStringAsync("?sl=" + sourceLanguage + "&tl=" + translateLanguage + "&text=" + text + "&op=translate").Result;
             var value0 = Regex.Match(result, @"<div class=""OPPzxe"">(.*?)<div class=""kGmWO"">", RegexOptions.Singleline).Value;
             var valuet = Regex.Match(value0, @"<c-wiz jsrenderer=""WFss9b""(.*?)>(.*?)<div class=""ZyvIDe"" jsname=""kDm4dd"">", RegexOptions.Singleline).Value;
             var value1 = Regex.Match(valuet, @"<div class=""dePhmb""(.*?)>(.*?)<div class=""BdDRKe""(.*?)>", RegexOptions.Singleline).Value;

@@ -1,46 +1,30 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Threading;
+using zhsub.Views;
 
 namespace zhsub.Models
 {
-    class Video : Subtitle
+    internal class Video
     {
-        private readonly MediaElement mediaElement;
-        private readonly DockPanel dockPanel;
-        private readonly Slider slider;
-        private readonly TextBox txbPosition;
-        private readonly TextBox txbTick;
-        private readonly ComboBox comboBox;
-        private readonly TextBlock txbSubtitle;
+        private MainWindow mainWindow;
         private DispatcherTimer timer;
 
-
-        public Video(DockPanel dockPanel, MediaElement mediaElement, Slider slider, TextBox txbPosition, TextBox txbTick, ComboBox comboBox, ListView listView, TextBlock textBlock)
+        public Video(MainWindow mainWindow)
         {
-            this.mediaElement = mediaElement;
-            this.dockPanel = dockPanel;
-            this.slider = slider;
-            this.txbPosition = txbPosition;
-            this.txbTick = txbTick;
-            this.comboBox = comboBox;
-            this.txbSubtitle = textBlock;
-        }
-
-        public Video(ListView listView, TextBlock textBlock)
-        {
-            this.txbSubtitle = textBlock;
+            this.mainWindow = mainWindow;
         }
 
         public void Close()
         {
-            mediaElement.Pause();
-            dockPanel.Visibility = Visibility.Collapsed;
+            mainWindow.mdeVideo.Pause(); 
+            timer.Stop();
+
+            mainWindow.dpaVideo.Visibility = Visibility.Collapsed;
         }
 
-        public new void Open()
+        public void Open()
         {
             var openFileDialog = new OpenFileDialog() 
             { 
@@ -50,11 +34,11 @@ namespace zhsub.Models
 
             if (openFileDialog.ShowDialog() == false) return;
 
-            mediaElement.Source = new Uri(openFileDialog.FileName);
-            dockPanel.Visibility = Visibility.Visible;
+            mainWindow.mdeVideo.Source = new Uri(openFileDialog.FileName);
+            mainWindow.dpaVideo.Visibility = Visibility.Visible;
 
-            mediaElement.Play();
-            mediaElement.Pause();
+            mainWindow.mdeVideo.Play();
+            mainWindow.mdeVideo.Pause();
 
             Timer();
             Slider();
@@ -62,17 +46,17 @@ namespace zhsub.Models
 
         public void Pause()
         {
-            slider.IsEnabled = true;
+            mainWindow.sliDuration.IsEnabled = true;
 
-            mediaElement.Pause();
+            mainWindow.mdeVideo.Pause();
             timer.Stop();
         }
 
         public void Play()
         {
-            slider.IsEnabled = false;
+            mainWindow.sliDuration.IsEnabled = false;
 
-            mediaElement.Play();
+            mainWindow.mdeVideo.Play();
             timer.Start();  
         }
 
@@ -83,10 +67,10 @@ namespace zhsub.Models
 
         public void Replay()
         {
-            slider.IsEnabled = false;
+            mainWindow.sliDuration.IsEnabled = false;
 
-            mediaElement.Position = new TimeSpan(0, 0, 0, 0);
-            mediaElement.Play();
+            mainWindow.mdeVideo.Position = new TimeSpan(0, 0, 0, 0);
+            mainWindow.mdeVideo.Play();
 
             Timer();
             timer.Start();
@@ -94,15 +78,15 @@ namespace zhsub.Models
         
         private void Slider()
         {
-            mediaElement.MediaOpened += (s, e) =>
+            mainWindow.mdeVideo.MediaOpened += (s, e) =>
             {
-                slider.Maximum = mediaElement.NaturalDuration.TimeSpan.TotalSeconds;
-                slider.TickFrequency = slider.Maximum / 60;
+                mainWindow.sliDuration.Maximum = mainWindow.mdeVideo.NaturalDuration.TimeSpan.TotalSeconds;
+                mainWindow.sliDuration.TickFrequency = mainWindow.sliDuration.Maximum / 60;
             };
 
-            slider.IsEnabledChanged += (s, e) =>
+            mainWindow.sliDuration.IsEnabledChanged += (s, e) =>
             {
-                mediaElement.Position = new TimeSpan(0, 0, (int)slider.Value / 60, (int)slider.Value % 60);
+                mainWindow.mdeVideo.Position = new TimeSpan(0, 0, (int)mainWindow.sliDuration.Value / 60, (int)mainWindow.sliDuration.Value % 60);
             };
         }
 
@@ -112,8 +96,8 @@ namespace zhsub.Models
 
             timer.Tick += (s, e) =>
             {
-                slider.Value = mediaElement.Position.TotalSeconds;
-                txbPosition.Text = $"{ mediaElement.Position } - { mediaElement.Position.Ticks }";   
+                mainWindow.sliDuration.Value = mainWindow.mdeVideo.Position.TotalSeconds;
+                mainWindow.txbDuration.Text = $"{ mainWindow.mdeVideo.Position } - { mainWindow.mdeVideo.Position.Ticks }";   
             };
         }
     }

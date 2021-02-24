@@ -15,19 +15,19 @@ namespace zhsub.Commands
             window.Title = fileName[(fileName.LastIndexOf('\\') + 1)..] + " - Zither Harp Subtitles 1.0.0";
         }
 
-        public static void Video(MediaElement mediaElement, DockPanel dockPanel, string fileName)
+        public static void Video(MediaElement mdeVideo, DockPanel dockPanel, string fileName)
         {
-            mediaElement.Source = new Uri(fileName);
-            mediaElement.Visibility = Visibility.Visible;
+            mdeVideo.Source = new Uri(fileName);
+            mdeVideo.Visibility = Visibility.Visible;
             dockPanel.Visibility = Visibility.Visible;
 
-            mediaElement.Play();
-            mediaElement.Pause();
+            mdeVideo.Play();
+            mdeVideo.Pause();
         }
 
-        public static void VideoSlider(MediaElement mediaElement, Slider slider)
+        public static void VideoSlider(MediaElement mdeVideo, Slider slider)
         {
-            slider.TickFrequency = mediaElement.Position.TotalSeconds / 10;
+            slider.TickFrequency = mdeVideo.Position.TotalSeconds / 10;
 
             var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
 

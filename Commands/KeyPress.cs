@@ -11,7 +11,7 @@ namespace zhsub.Commands
         {
             if (sender as ListView == null) return;
 
-            var item = (sender as ListView).SelectedItem as Subtitle;
+            var item = (sender as ListView).SelectedItem as SubtitleLine;
 
             var text = $"{ item.StartTime };{ item.EndTime };{ item.Text }";
 

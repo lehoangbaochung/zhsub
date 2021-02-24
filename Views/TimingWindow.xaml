@@ -1,0 +1,42 @@
+﻿<Window x:Class="zhsub.Views.TimingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Shift Times" Height="260" Width="400" WindowStyle="ToolWindow" ResizeMode="NoResize">
+    <DockPanel LastChildFill="False">
+        <GroupBox Header="Shift by" Margin="5" DockPanel.Dock="Top">
+            <DockPanel LastChildFill="False">
+                <Label>Time:</Label>
+                <TextBox x:Name="tbxHour" Width="50" TextAlignment="Center" VerticalAlignment="Center" MaxLength="2">00</TextBox>
+                <Label>:</Label>
+                <TextBox x:Name="tbxMinute" Width="50" TextAlignment="Center" VerticalAlignment="Center" MaxLength="2">00</TextBox>
+                <Label>:</Label>
+                <TextBox x:Name="tbxSecond" Width="50" TextAlignment="Center" VerticalAlignment="Center" MaxLength="2">00</TextBox>
+                <Label>.</Label>
+                <TextBox x:Name="tbxMilliSecond" Width="50" TextAlignment="Center" VerticalAlignment="Center" MaxLength="2">000</TextBox>
+                <RadioButton x:Name="rbtForward" DockPanel.Dock="Bottom" Margin="5" GroupName="Shift" IsChecked="True">_Forward</RadioButton>
+                <RadioButton x:Name="rbtBackward" DockPanel.Dock="Bottom" Margin="5" GroupName="Shift">_Backward</RadioButton>
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Header="Affect" Margin="5" DockPanel.Dock="Top">
+            <DockPanel LastChildFill="False">
+                <RadioButton x:Name="rbtAllRows" Margin="5" GroupName="Affect" IsChecked="True">_All rows</RadioButton>
+                <RadioButton x:Name="rbtSelectedRows" Margin="5" GroupName="Affect">Selected _rows</RadioButton>
+                <RadioButton x:Name="rbtOnwardRows" Margin="5" GroupName="Affect">Selection _onward</RadioButton>
+            </DockPanel>
+        </GroupBox>
+        <GroupBox Header="Times" Margin="5" DockPanel.Dock="Top"> 
+            <DockPanel LastChildFill="False">
+                <RadioButton x:Name="rbtBothTimes" Margin="5" GroupName="Times" IsChecked="True">Start _and End times</RadioButton>
+                <RadioButton x:Name="rbtStartTime" Margin="5" GroupName="Times">_Start times only</RadioButton>
+                <RadioButton x:Name="rbtEndTime" Margin="5" GroupName="Times">_End times only</RadioButton>
+            </DockPanel>
+        </GroupBox>
+        <DockPanel LastChildFill="False" DockPanel.Dock="Bottom" Margin="5">
+            <Button x:Name="btnCancel" DockPanel.Dock="Right" Margin="5" Width="50">Cancel</Button>
+            <Button x:Name="btnOK" DockPanel.Dock="Right" Margin="5" Width="50">OK</Button>
+        </DockPanel>
+    </DockPanel>
+</Window>

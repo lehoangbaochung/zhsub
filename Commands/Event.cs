@@ -6,7 +6,7 @@ namespace zhsub.Commands
 {
     //class Event
     //{
-    //    public static void ListViewItem_SelectionChanged(ListView listView, MediaElement mediaElement, Slider slider)
+    //    public static void ListViewItem_SelectionChanged(ListView listView, MediaElement mdeVideo, Slider slider)
     //    {
     //        listView.SelectionChanged += (s, e) =>
     //        {
@@ -19,25 +19,25 @@ namespace zhsub.Commands
     //                var second = int.Parse(item.StartTime.ToString().Split(':')[2].Split('.')[0]);
     //                var millisecond = int.Parse(item.StartTime.ToString().Split(':')[2].Split('.')[1]);
 
-    //                mediaElement.Position = new TimeSpan(0, hour, minute, second, millisecond);
-    //                slider.Value = mediaElement.Position.TotalSeconds;
+    //                mdeVideo.Position = new TimeSpan(0, hour, minute, second, millisecond);
+    //                slider.Value = mdeVideo.Position.TotalSeconds;
     //            }    
     //        };
     //    }
 
-    //    public static void MediaElement_ValueChanged(MediaElement mediaElement, ListView listView, TextBlock textBlock)
+    //    public static void MediaElement_ValueChanged(MediaElement mdeVideo, ListView listView, TextBlock textBlock)
     //    {
     //        if (listView.Items[0] is Srt)
     //        {
     //            foreach (Srt item in listView.Items)
     //            {
-    //                if (item.StartTime.ToString() == mediaElement.Position.ToString().Remove(12))
+    //                if (item.StartTime.ToString() == mdeVideo.Position.ToString().Remove(12))
     //                {
     //                    textBlock.Text = item.Text.ToString();
                         
     //                }
 
-    //                //if (item.EndTime.ToString() == mediaElement.Position.ToString().Remove(12))
+    //                //if (item.EndTime.ToString() == mdeVideo.Position.ToString().Remove(12))
     //                //{
     //                //    textBlock.Text = null;
     //                //    break;
